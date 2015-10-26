@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/LBS/!svn/ver/4926/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/History
+END
+ADHistoryModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/History/ADHistoryModel.m
+END
+ADHistoryPoint.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/History/ADHistoryPoint.h
+END
+ADHistoryPoint.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/History/ADHistoryPoint.m
+END
+ADHistoryModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/History/ADHistoryModel.h
+END

@@ -1,0 +1,20 @@
+//
+//  ADUsersMapViewController.h
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-22.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+
+#import "BMapKit.h"
+#import "ADMenuBaseViewController.h"
+#import "ADDevicesModel.h"
+
+@interface ADUsersMapViewController : ADMenuBaseViewController<BMKMapViewDelegate>
+@property (nonatomic) BMKMapView *mapView;
+@property (nonatomic) NSMutableArray *annotations;
+@property (nonatomic) ADDevicesModel *devicesModel;
+@property (nonatomic) NSInteger modelFlag;//0 all 1 auth 2 shared
+@property (nonatomic) NSInteger authIndex;
+@end

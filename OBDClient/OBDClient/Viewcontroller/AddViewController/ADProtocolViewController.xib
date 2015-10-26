@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="7706" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ADProtocolViewController">
+            <connections>
+                <outlet property="protocolTV" destination="akZ-gX-qeP" id="Ilm-YG-l4y"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="akZ-gX-qeP">
+                    <rect key="frame" x="0.0" y="63" width="320" height="505"/>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                    <string key="text">本应用所提供的各项服务和内容的所有权和运作权均归游世移动通信技术（上海）有限公司（以下简称“车随行”）所有。
+
+一、协议总则
+
+1.本协议内容包括协议正文、车随行各单项服务协议及其他车随行已经发布的或将来可能发布的各类规则，包括但不限于 隐私政策、 免责声明、 知识产权声明、 权利声明、车随行用户协议、 车随行个人账户协议等其他协议（“其他条款”）。如果本协议与“其他条款”有不一致之处，则以“其他条款”为准。除另行明确声明外，任何车随行提供的服务均受本协议约束。
+2.车随行如制订、修改本协议及/或各类规则的，将通过在网站首页、用户登录页面和其他相关页面发布公告方式通知用户，您也可以登陆本页面及其他相关页面，了解最新的协议内容。变更后的协议和规则一经公布立即自动生效。如您不同意相关变更，应当立即停止访问或使用车随行服务。若您继续使用车随行服务的，即表示您接受已经修订的协议和规则。
+3.若您作为车随行的关联公司或合作公司的用户登陆车随行平台，访问车随行或使用车随行服务，即视为您同意本协议的所有条款及车随行公布的其他规则、说明和操作指引。 
+二、用户权利
+
+在您完成注册申请手续后，意味着您已获得车随行账户（用户名）的使用权。您应提供及时、详尽及准确的个人资料，并不断更新注册资料，符合及时、详尽准确的要求。您应妥善保管您的账户（用户名）和密码，通过您的账户（用户名）和密码操作或实施的行为，将视为您本人的行为，由您本人承担相应的责任和后果。如果您发现他人不当使用您的账户或有任何其他可能危及您的账户安全的情形时，您应当立即以书面、有效方式通知车随行，要求车随行暂停相关服务。在此，您理解车随行对您的请求采取行动需要合理时间，车随行对在采取行动前已经产生的后果（包括但不限于您的任何损失）不承担任何责任。
+三、使用规则
+
+1.您在使用车随行服务时，必须遵守中华人民共和国相关法律法规的规定，您应同意将不会利用该服务进行任何违法或不正当的活动，包括但不限于下列行为:
+1.1上载、展示、张贴、传播或以其它方式传送含有下列内容之一的信息：
+1) 反对宪法所确定的基本原则的；
+2) 危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；
+3) 损害国家荣誉和利益的；
+4) 煽动民族仇恨、民族歧视、破坏民族团结的；
+5) 破坏国家宗教政策，宣扬邪教和封建迷信的；
+6) 散布谣言，扰乱社会秩序，破坏社会稳定的；
+7) 散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；
+8) 侮辱或者诽谤他人，侵害他人合法权利的；
+9) 含有虚假、有害、胁迫、侵害他人隐私、骚扰、侵害、中伤、粗俗、猥亵、或其它道德上令人反感的内容；
+10) 含有中国法律、法规、规章、条例以及任何具有法律效力之规范所限制或禁止的其它内容的。
+1.2为任何非法目的而使用网络服务系统。
+1.3利用车随行网络服务从事以下活动：
+1) 未经允许，进入计算机信息网络或者使用计算机信息网络资源的； 未经允许，对计算机信息网络功能进行删除、修改或者增加的；未经允许，对进入计算机信息网络中存储、处理或者传输的数据和应用程序进行删除、修改或者增加的；故意制作、传播计算机病毒等破坏性程序的；其他危害计算机信息网络安全的行为。
+2) 对车随行上的任何数据作商业性利用，包括但不限于在未经去哪儿事先书面同意的情况下，以复制、传播等任何方式使用车随行上展示的资料。
+3) 使用任何装置、软件或例行程序等其他方式干预或试图干预车随行的正常运作或正在车随行上进行的任何交易、活动，或采取任何将导致不合理的庞大数据负载加诸车随行设备的行动。
+4) 违反诚实信用原则的不正当竞争行为，或恶意下订单或虚假交易等其他恶意扰乱去哪儿交易秩序的行为。
+5) 与网上交易无关的其他行为。
+2.对于您违反本服务协议，导致或产生的任何第三方主张的任何索赔、要求或损失，包括合理的律师费，您同意赔偿去哪儿与合作公司，并使之免受损害。同时，车随行有权视您的行为性质，采取包括但不限于删除您发布信息内容、暂停使用许可、终止服务、限制使用、回收车随行账号、追究法律责任等措施，因车随行采取上述合理措施给您造成的损失，车随行不承担任何责任。对恶意注册车随行账号或利用车随行账号进行违法活动、捣乱、骚扰、欺骗其他用户以及其他违反本协议的行为，车随行有权回收其账号。同时，车随行会视司法部门的要求，协助调查。
+3.您须对自己在使用车随行服务过程中的行为承担法律责任，包括但不限于：对受到侵害者进行赔偿，以及在车随行在先承担了因您的行为导致的行政处罚或侵权损害赔偿责任后，您应给予车随行等额的赔偿。</string>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="akZ-gX-qeP" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="63" id="BI2-SD-w3C"/>
+                <constraint firstAttribute="trailing" secondItem="akZ-gX-qeP" secondAttribute="trailing" id="LRD-SO-1kW"/>
+                <constraint firstItem="akZ-gX-qeP" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="qpt-bk-UjS"/>
+                <constraint firstAttribute="bottom" secondItem="akZ-gX-qeP" secondAttribute="bottom" id="yEe-65-r5R"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+            <point key="canvasLocation" x="256" y="353"/>
+        </view>
+    </objects>
+</document>

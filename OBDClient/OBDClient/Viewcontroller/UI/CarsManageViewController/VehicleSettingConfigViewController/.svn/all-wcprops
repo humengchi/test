@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController
+END
+ADVehicleSettingConfigViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 170
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigViewController.m
+END
+ADVehicleSettingConfigCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 160
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigCell.m
+END
+ADVehicleSettingConfigEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 174
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigEditViewController.h
+END
+ADVehicleSettingConfigEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 174
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigEditViewController.m
+END
+ADVehicleSettingConfigViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 172
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigViewController.xib
+END
+ADVehicleSettingConfigViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 170
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigViewController.h
+END
+ADVehicleSettingConfigCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 160
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigCell.h
+END
+ADVehicleSettingConfigEditViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 176
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleSettingConfigViewController/ADVehicleSettingConfigEditViewController.xib
+END

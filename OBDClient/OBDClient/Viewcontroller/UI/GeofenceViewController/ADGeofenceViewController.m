@@ -1,0 +1,391 @@
+//
+//  ADGeofenceViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-9.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADGeofenceViewController.h"
+
+@interface ADGeofenceViewController ()
+{
+    UIBarButtonItem *editButtonItem;
+}
+@property (nonatomic) UILabel *noticeLabel;
+@property (nonatomic) NSArray *itemArrayNodata;
+@property (nonatomic) NSArray *itemArrayHasdata;
+@end
+
+@implementation ADGeofenceViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil
+               bundle:(NSBundle *)nibBundleOrNil
+           deviceBase:(ADDeviceBase *)aDeviceBase
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _deviceBase = aDeviceBase;
+        _geofenceModel = [[ADGeofenceModel alloc] init];
+        [_geofenceModel addObserver:self
+                         forKeyPath:KVO_GEOGENCE_ALL_PATH_NAME
+                            options:NSKeyValueObservingOptionNew
+                            context:NULL];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestGeogencesSuccess:)
+                                                     name:ADGeofenceModelRequestSuccessNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestGeogencesFail:)
+                                                     name:ADGeofenceModelRequestFailNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestGeogencesTiemout:)
+                                                     name:ADGeofenceModelRequestTimeoutNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateGeogenceSuccess:)
+                                                     name:ADGeofenceModelUpdateSuccessNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateGeogenceFail:)
+                                                     name:ADGeofenceModelUpdateFailNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateGeogenceTimeout:)
+                                                     name:ADGeofenceModelUpdateTimeoutNotification
+                                                   object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(removeGeogenceSuccess:)
+                                                     name:ADGeofenceModelRemoveSuccessNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(removeGeogenceFail:)
+                                                     name:ADGeofenceModelRemoveFailNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(removeGeogenceTimeout:)
+                                                     name:ADGeofenceModelRemoveTimeoutNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(LoginTimeOut)
+                                                     name:ADGeofenceModelLoginTimeOutNotification
+                                                   object:nil];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_geofenceModel removeObserver:self
+                        forKeyPath:KVO_GEOGENCE_ALL_PATH_NAME];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRequestSuccessNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRequestFailNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRequestTimeoutNotification
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelUpdateSuccessNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelUpdateFailNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelUpdateTimeoutNotification
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRemoveSuccessNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRemoveFailNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADGeofenceModelRemoveTimeoutNotification
+                                                  object:nil];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == _geofenceModel) {
+        if ([keyPath isEqualToString:KVO_GEOGENCE_ALL_PATH_NAME]) {
+            if(_geofenceModel.geogences.count==0){
+                _noticeLabel.hidden=NO;
+                self.navigationItem.rightBarButtonItems = _itemArrayNodata;
+            }else{
+                 _noticeLabel.hidden=YES;
+                self.navigationItem.rightBarButtonItems = _itemArrayHasdata;
+            }
+            //TODO:
+            [_tableView reloadData];
+            return;
+        }
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+- (void)beginRequestAllGeofencesWithDeviceID:(NSString *)aDeviceID
+{
+    [self loadingUI];
+    [_geofenceModel requestGeofencesWithDeviceID:aDeviceID];
+}
+
+- (void)beginRemoveGeofenceWithGeofenceBase:(ADGeofenceBase *)aGeofenceBase
+{
+    [self loadingUI];
+    [_geofenceModel removeGeofenceWithDeviceID:_deviceBase.deviceID geoID:aGeofenceBase.geoID];
+}
+
+- (void)loadingUI
+{
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+}
+
+/*!!! risk to crash perhaps the views did not load. later will fix **/
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self beginRequestAllGeofencesWithDeviceID:_deviceBase.deviceID];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.title=NSLocalizedStringFromTable(@"geofenceKey",@"MyString", @"");
+    self.navigationItem.leftBarButtonItem=nil;
+
+    if (!IOS7_OR_LATER) {
+        _tableView=[[UITableView alloc]initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+    }
+    if (IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {            //IOS7.0 3.5寸屏幕
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 64, WIDTH, 416) style:UITableViewStylePlain];
+        [self setExtraCellLineHidden:_tableView];
+	}
+    if (IOS7_OR_LATER && DEVICE_IS_IPHONE5) {             //IOS7.0 4.0寸屏幕
+        _tableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 64, WIDTH, 504) style:UITableViewStylePlain];
+        [self setExtraCellLineHidden:_tableView];
+	}
+    
+    _tableView.delegate=self;
+    _tableView.dataSource=self;
+    _tableView.backgroundView = nil;
+    _tableView.backgroundColor = [UIColor clearColor];
+    
+    [self.view addSubview:_tableView];
+    editButtonItem = [[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"editKey",@"MyString", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(tableViewEdit:)];
+    if (IOS7_OR_LATER) {
+        editButtonItem.tintColor=[UIColor lightGrayColor];
+    }
+//    UIBarButtonItem *editButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(tableViewEdit:)];
+    UIBarButtonItem *addButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(newButtonTap:)];
+    addButtonItem.tintColor = [UIColor lightGrayColor];
+    UIBarButtonItem *refreshButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(refreshButtonTap:)];
+    refreshButtonItem.tintColor = [UIColor lightGrayColor];
+    
+    _itemArrayNodata=[NSArray arrayWithObjects:refreshButtonItem,addButtonItem, nil];
+    _itemArrayHasdata=[NSArray arrayWithObjects:refreshButtonItem,addButtonItem,editButtonItem, nil];
+    self.navigationItem.rightBarButtonItems = _itemArrayNodata;
+    
+    
+    _noticeLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 100, WIDTH, 40)];
+    _noticeLabel.textColor=[UIColor grayColor];
+    _noticeLabel.backgroundColor=[UIColor clearColor];
+    _noticeLabel.textAlignment=NSTextAlignmentCenter;
+    _noticeLabel.text=NSLocalizedStringFromTable(@"noGeofence",@"MyString", @"");
+    _noticeLabel.hidden=YES;
+    [self.view addSubview:_noticeLabel];
+    
+    [self beginRequestAllGeofencesWithDeviceID:_deviceBase.deviceID];
+}
+
+
+-(void)setExtraCellLineHidden: (UITableView *)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+
+- (void)tableViewEdit:(id)sender
+{
+    [_tableView setEditing:!_tableView.isEditing animated:YES];
+    if(_tableView.isEditing){
+        editButtonItem.title=NSLocalizedStringFromTable(@"completeKey",@"MyString", @"");
+    }else{
+        editButtonItem.title=NSLocalizedStringFromTable(@"editKey",@"MyString", @"");
+    }
+}
+
+- (void)viewDidUnload {
+    [self setTableView:nil];
+    [super viewDidUnload];
+}
+
+- (IBAction)refreshButtonTap:(id)sender {
+    [self beginRequestAllGeofencesWithDeviceID:_deviceBase.deviceID];
+}
+
+- (IBAction)newButtonTap:(id)sender {
+    [self pushToGeofenceUpdateVCWithgeofenceBase:nil];
+}
+
+- (void)cellStatusButtonTap:(ADGeofenceBase *)aGeofenceBase
+{
+    [self loadingUI];
+    ADGeofenceBase *newGeofenceBase = [ADGeofenceBase initWithCopy:aGeofenceBase];
+//    newGeofenceBase.applyField = !newGeofenceBase.applyField;
+    [_geofenceModel updateGeofenceWithNewGeofenceBase:newGeofenceBase oldGeofenceBase:aGeofenceBase];
+}
+
+#pragma mark - UITableViewDataSource
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath{
+    if(indexPath.section==0){
+        if(_geofenceModel.geogences.count==0){
+            return NO;
+        }
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [_geofenceModel.geogences count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ADGeofenceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"geofence.cell"];
+    if (!cell) {
+        cell = [[ADGeofenceCell alloc] initWithStyle:UITableViewCellStyleSubtitle
+                                         reuseIdentifier:@"geofence.cell"
+                                            geofenceBase:[_geofenceModel.geogences objectAtIndex:indexPath.row]
+                                            buttonTarget:self
+                                            buttonAction:@selector(cellStatusButtonTap:)];
+    }
+        
+    [cell updateCellWithGeofenceBase:[_geofenceModel.geogences objectAtIndex:indexPath.row]];
+        
+//    if (!IOS7_OR_LATER) {
+        cell.backgroundColor=[UIColor whiteColor];
+//    }else{
+//        cell.backgroundColor=[UIColor clearColor];
+//    }
+    
+        //    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    return cell;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 50;
+}
+
+#pragma mark Table左边删除
+//TableView左边的删除按钮
+- (void)tableView:(UITableView *)tableView
+commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
+forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ADGeofenceBase *gefence=[_geofenceModel.geogences objectAtIndex:indexPath.row];
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        if ([gefence.cmdType isEqualToString:@"0"]) {
+            [IVToastHUD showAsToastErrorWithStatus:NSLocalizedStringFromTable(@"beingDeleted",@"MyString", @"")];
+        }else{
+            [self beginRemoveGeofenceWithGeofenceBase:[_geofenceModel.geogences objectAtIndex:indexPath.row]];
+        }
+    }
+}
+
+- (void)pushToGeofenceUpdateVCWithgeofenceBase:(ADGeofenceBase *)aGeofenceBase
+{
+    ADGeofenceUpdateViewController *geofenceUpdateVC = [[ADGeofenceUpdateViewController alloc] initWithNibName:nil
+                                                                                                        bundle:nil
+                                                                                                  geofenceBase:aGeofenceBase];
+    [geofenceUpdateVC updateDeviceID:_deviceBase.deviceID];
+    [self.navigationController pushViewController:geofenceUpdateVC animated:YES];
+}
+
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self pushToGeofenceUpdateVCWithgeofenceBase:[_geofenceModel.geogences objectAtIndex:indexPath.row]];
+}
+
+#pragma mark - notification handle
+- (void)requestGeogencesSuccess:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestGeogencesFail:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+}
+
+- (void)requestGeogencesTimeout:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (void)updateGeogenceSuccess:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD showAsToastSuccessWithStatus:NSLocalizedStringFromTable(@"updateGeofencesuccess",@"MyString", @"")];
+//    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)updateGeogenceFail:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+}
+
+- (void)updateGeogenceTimeout:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (void)removeGeogenceSuccess:(NSNotification *)aNoti
+{
+    [self beginRequestAllGeofencesWithDeviceID:_deviceBase.deviceID];
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)removeGeogenceFail:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+}
+
+- (void)removeGeogenceTimeout:(NSNotification *)aNoti
+{
+//    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (void)LoginTimeOut{
+    UIViewController* login=[[ADiPhoneLoginViewController alloc]initWithNibName:nil bundle:nil];
+    [self.view.window setRootViewController:login];
+}
+
+@end

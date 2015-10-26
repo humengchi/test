@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController
+END
+ADiPhoneUserManageViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 133
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADiPhoneUserManageViewController.xib
+END
+ADUserFriendsCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADUserFriendsCell.xib
+END
+ADUserManageViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADUserManageViewController.h
+END
+ADiPhoneUserManageViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADiPhoneUserManageViewController.h
+END
+ADUserFriendsCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADUserFriendsCell.h
+END
+ADUserManageViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADUserManageViewController.m
+END
+ADiPhoneUserManageViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADiPhoneUserManageViewController.m
+END
+ADUserFriendsCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UserManageViewController/ADUserFriendsCell.m
+END

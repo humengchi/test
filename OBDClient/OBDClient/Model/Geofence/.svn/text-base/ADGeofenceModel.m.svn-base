@@ -1,0 +1,271 @@
+//
+//  ADGeofenceModel.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-21.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADGeofenceModel.h"
+
+NSString * const ADGeofenceModelRequestSuccessNotification = @"ADGeofenceModelRequestSuccessNotification";
+NSString * const ADGeofenceModelRequestFailNotification = @"ADGeofenceModelRequestFailNotification";
+NSString * const ADGeofenceModelRequestTimeoutNotification = @"ADGeofenceModelRequestTimeoutNotification";
+
+NSString * const ADGeofenceModelUpdateSuccessNotification = @"ADGeofenceModelUpdateSuccessNotification";
+NSString * const ADGeofenceModelUpdateFailNotification = @"ADGeofenceModelUpdateFailNotification";
+NSString * const ADGeofenceModelUpdateTimeoutNotification = @"ADGeofenceModelUpdateTimeoutNotification";
+
+NSString * const ADGeofenceModelCreateSuccessNotification = @"ADGeofenceModelCreateSuccessNotification";
+NSString * const ADGeofenceModelCreateFailNotification = @"ADGeofenceModelCreateFailNotification";
+NSString * const ADGeofenceModelCreateTimeoutNotification = @"ADGeofenceModelCreateTimeoutNotification";
+
+NSString * const ADGeofenceModelRemoveSuccessNotification = @"ADGeofenceModelRemoveSuccessNotification";
+NSString * const ADGeofenceModelRemoveFailNotification = @"ADGeofenceModelRemoveFailNotification";
+NSString * const ADGeofenceModelRemoveTimeoutNotification = @"ADGeofenceModelRemoveTimeoutNotification";
+NSString * const ADGeofenceModelLoginTimeOutNotification = @"ADGeofenceModelLoginTimeOutNotification";
+
+@implementation ADGeofenceModel
+
+- (void)requestGeofencesWithDeviceID:(NSString *)aDeviceID
+{
+    _requestType = GEOGENCEMODEL_GET_ALL;
+    [super startCallWithService:API_GEOFENCE_SERVICE
+                         method:API_GEOFENCE_ALL_METHOD
+                      arguments:[self argumentConfig:[NSArray arrayWithObjects:aDeviceID, nil]]];
+}
+
+/* geofencetype为0:圆形 , 1 :多边形
+   pointcount 当geofencetype为1时需要，顶点数
+   latitude1、longitude1 ：geofencetype为0圆形中心点 ，多边形则最多有10个顶点  
+ **/
+- (void)createGeofenceWithGeofenceBase:(ADGeofenceBase *)aGeofenceBase
+{
+    _requestType = GEOGENCEMODEL_CREATE;
+    NSArray *oldArgs = [NSArray arrayWithObjects:aGeofenceBase.deviceID,
+                        aGeofenceBase.geoName,
+                        @"0",
+                        [NSString stringWithFormat:@"%f",aGeofenceBase.radius],
+                        aGeofenceBase.pCount,
+                        [NSString stringWithFormat:@"%f",aGeofenceBase.lat1],
+                        [NSString stringWithFormat:@"%f",aGeofenceBase.lng1],
+                        aGeofenceBase.lat2,
+                        aGeofenceBase.lng2,
+                        aGeofenceBase.lat3,
+                        aGeofenceBase.lng3,
+                        aGeofenceBase.lat4,
+                        aGeofenceBase.lng4,
+                        aGeofenceBase.lat5,
+                        aGeofenceBase.lat5,
+                        aGeofenceBase.lat6,
+                        aGeofenceBase.lng6,
+                        aGeofenceBase.lat7,
+                        aGeofenceBase.lng7,
+                        aGeofenceBase.lat8,
+                        aGeofenceBase.lng8,
+                        aGeofenceBase.lat9,
+                        aGeofenceBase.lng9,
+                        aGeofenceBase.lat10,
+                        aGeofenceBase.lng10,
+                        aGeofenceBase.geoID, nil];
+    NSArray *args = [self argumentConfig:oldArgs];
+    
+    [super startCallWithService:API_GEOFENCE_SERVICE
+                         method:API_GEOFENCE_CREATE_METHOD
+                      arguments:args];
+}
+
+- (void)updateGeofenceWithNewGeofenceBase:(ADGeofenceBase *)aGeofenceBase
+                          oldGeofenceBase:(ADGeofenceBase *)aOldGeofenceBase
+{
+    _requestType = GEOGENCEMODEL_UPDATE;
+    _currentUpdateGeofenceBase = aOldGeofenceBase;
+    NSArray *argArray = [self argumentConfig:[NSArray arrayWithObjects:aGeofenceBase.deviceID,
+                                               aGeofenceBase.geoName,
+                                               @"0",
+                                               [NSString stringWithFormat:@"%f", aGeofenceBase.radius],
+                                               aGeofenceBase.pCount,
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat1],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng1],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat2],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng2],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat3],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng3],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat4],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng4],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat5],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng5],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat6],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng6],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat7],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng7],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat8],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng8],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat9],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng9],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lat10],
+                                               [NSString stringWithFormat:@"%f",aGeofenceBase.lng10],
+                                               aGeofenceBase.geoID, nil]];
+    ADLogV(@"参数: %@",argArray);
+    [super startCallWithService:API_GEOFENCE_SERVICE
+                         method:API_GEOFENCE_UPDATE_METHOD
+                      arguments:argArray];
+}
+
+//删除请求
+- (void)removeGeofenceWithDeviceID:(NSString *)aDeviceID
+                             geoID:(NSString *)aGeoID
+{
+    _removeOfDeviceID = aDeviceID;
+    _removeOfGeoID = aGeoID;
+    _requestType = GEOGENCEMODEL_REMOVE;
+    [super startCallWithService:API_GEOFENCE_SERVICE
+                         method:API_GEOFENCE_REMOVE_METHOD
+                      arguments:[self argumentConfig:[NSArray arrayWithObjects:aDeviceID, aGeoID, nil]]];
+}
+
+- (void)requestFinishedHandleWithData:(NSArray*)aDataArray   //aDataArray为围栏的数组
+{
+    if (_requestType == GEOGENCEMODEL_GET_ALL) {
+        
+        NSMutableArray *geogencesTempArray = [[NSMutableArray alloc] initWithCapacity:[aDataArray count]];
+        for (ASObject *asObject in aDataArray) {
+            NSDictionary *data = [asObject properties];
+            ADGeofenceBase *geogenceBase = [[ADGeofenceBase alloc] initWithDictionary:data];
+//            if([geogenceBase.cmdType isEqualToString:@"1"]){
+                [geogencesTempArray addObject:geogenceBase];
+//            }
+        }
+        self.geogences = geogencesTempArray;
+        
+    } else if (_requestType == GEOGENCEMODEL_CREATE) {
+        
+    } else if (_requestType == GEOGENCEMODEL_UPDATE) {
+        //success.
+        
+    } else if (_requestType == GEOGENCEMODEL_REMOVE) {
+        
+    }
+}
+
+- (void)remotingDidFinishHandleWithCall:(AMFRemotingCall *)aRemotingCall
+                         receivedObject:(NSObject *)object
+{
+    NSLog(@"%@",object);
+    NSString *resultCode = [(NSDictionary *)object objectForKey:@"resultCode"];
+    
+    if ([resultCode isKindOfClass:[NSNull class]]) {
+        [self postFailNoti:nil];
+        
+        NSAssert(0,@"the data return, is null~. ADGeofenceModel");
+        return;
+    }
+    
+    if ([resultCode isEqualToString:@"200"]) {
+        NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+        [self requestFinishedHandleWithData:dataArray];
+        [self postSuccessNoti];
+    }
+    else
+    {
+        if (_requestType==GEOGENCEMODEL_GET_ALL||_requestType==GEOGENCEMODEL_CREATE||_requestType==GEOGENCEMODEL_UPDATE||_requestType==GEOGENCEMODEL_REMOVE) {
+            if ([resultCode isEqualToString:@"202"]||[resultCode isEqualToString:@"203"]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelLoginTimeOutNotification object:nil];
+            }
+        }
+        [self postFailNoti:(NSDictionary *)object];
+    }
+}
+
+- (void)remotingDidFailHandleWithCall:(AMFRemotingCall *)aRemotingCall
+                                error:(NSError *)aError
+{
+    [self postFailNoti:nil];
+}
+
+- (void)postSuccessNoti
+{
+    switch (_requestType) {
+        case GEOGENCEMODEL_GET_ALL:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRequestSuccessNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_CREATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelCreateSuccessNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_UPDATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelUpdateSuccessNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_REMOVE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRemoveSuccessNotification object:self];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)postFailNoti:(NSDictionary *)dictionary
+{
+    switch (_requestType) {
+        case GEOGENCEMODEL_GET_ALL:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRequestFailNotification object:self userInfo:dictionary];
+        }
+            break;
+        case GEOGENCEMODEL_CREATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelCreateFailNotification object:self userInfo:dictionary];
+        }
+            break;
+        case GEOGENCEMODEL_UPDATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelUpdateFailNotification object:self userInfo:dictionary];
+        }
+            break;
+        case GEOGENCEMODEL_REMOVE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRemoveFailNotification object:self userInfo:dictionary];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)postTimeoutNoti
+{
+    switch (_requestType) {
+        case GEOGENCEMODEL_GET_ALL:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRequestTimeoutNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_CREATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelCreateTimeoutNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_UPDATE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelUpdateTimeoutNotification object:self];
+        }
+            break;
+        case GEOGENCEMODEL_REMOVE:
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADGeofenceModelRemoveTimeoutNotification object:self];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+
+@end

@@ -1,0 +1,24 @@
+//
+//  ADInsureInfoEditViewController.h
+//  OBDClient
+//
+//  Created by lbs anydata on 13-10-9.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADMenuBaseViewController.h"
+#import "ADVehicleInsure.h"
+@class ADInsureInfoEditViewController;
+@protocol ADEditInsureInfoDelegate <NSObject>
+
+- (void) editContactViewController:(ADInsureInfoEditViewController *) vehicleLicenseEditViewController didEditContact:(NSArray * ) contact;
+
+@end
+
+@interface ADInsureInfoEditViewController : ADMenuBaseViewController<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource>
+@property (weak, nonatomic) id<ADEditInsureInfoDelegate> delegate;
+@property (nonatomic) ADVehicleInsure *vehicleInsure;
+
+
+
+@end

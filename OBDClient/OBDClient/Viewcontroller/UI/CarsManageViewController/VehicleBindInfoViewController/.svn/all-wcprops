@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleBindInfoViewController
+END
+ADBindInfoViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 153
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleBindInfoViewController/ADBindInfoViewController.h
+END
+ADBindInfoViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 153
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleBindInfoViewController/ADBindInfoViewController.m
+END
+ADBindInfoViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 155
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleBindInfoViewController/ADBindInfoViewController.xib
+END

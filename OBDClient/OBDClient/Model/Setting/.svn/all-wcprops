@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting
+END
+ADGetMessageNotifactionSwitchModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetMessageNotifactionSwitchModel.h
+END
+ADSetReadFlagForCurrentMessageModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForCurrentMessageModel.m
+END
+ADTripLogModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADTripLogModel.m
+END
+ADGetGroupMessageModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetGroupMessageModel.m
+END
+ADGetMessageGroupModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetMessageGroupModel.m
+END
+ADSetReadFlagForAllMessageModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForAllMessageModel.h
+END
+ADGetMessageNotifactionSwitchModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetMessageNotifactionSwitchModel.m
+END
+ADSetReadFlagForGroupMessageModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForGroupMessageModel.h
+END
+ADSetReadFlagForAllMessageModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForAllMessageModel.m
+END
+ADSetReadFlagForGroupMessageModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForGroupMessageModel.m
+END
+ADSetReadFlagForCurrentMessageModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADSetReadFlagForCurrentMessageModel.h
+END
+ADTripLogModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADTripLogModel.h
+END
+ADGetGroupMessageModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetGroupMessageModel.h
+END
+ADGetMessageGroupModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Setting/ADGetMessageGroupModel.h
+END

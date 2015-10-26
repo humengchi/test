@@ -1,0 +1,41 @@
+//
+//  ADLoginViewController.h
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#import "ADUserDetailModel.h"
+
+
+
+
+@interface ADLoginViewController : UIViewController<UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource>
+
+@property (nonatomic) ADUserDetailModel *userDetailModel;
+@property (weak, nonatomic) IBOutlet UITextField *userNameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
+@property (weak, nonatomic) IBOutlet UIImageView *userIconImgView;
+@property (strong,nonatomic)UITableView* userNameTableView;
+@property (strong,nonatomic)NSMutableArray* matchArray;
+@property (strong,nonatomic)NSString* str;
+@property (weak, nonatomic) IBOutlet UIButton *loginBtn;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewOne;
+@property (weak, nonatomic) IBOutlet UIButton *registerBtn;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewTwo;
+@property (weak, nonatomic) IBOutlet UIButton *visitorLoginBtn;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewThree;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewFour;
+@property (weak, nonatomic) IBOutlet UILabel *userLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewFive;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewSix;
+@property (weak, nonatomic) IBOutlet UIImageView *ImgViewSeven;
+
+- (IBAction)loginTap:(id)sender;
+- (IBAction)registerButton:(id)sender;
+- (IBAction)visitorTap:(id)sender;
+- (IBAction)userNameMatch:(id)sender;
+@end

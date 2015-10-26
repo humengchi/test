@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/PID
+END
+ADPIDBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/PID/ADPIDBase.h
+END
+ADPIDBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/PID/ADPIDBase.m
+END
+ADPIDModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/PID/ADPIDModel.h
+END
+ADPIDModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/PID/ADPIDModel.m
+END

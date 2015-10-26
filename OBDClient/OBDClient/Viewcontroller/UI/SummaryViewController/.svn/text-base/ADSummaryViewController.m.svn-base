@@ -1,0 +1,872 @@
+//
+//  ADSummaryViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADSummaryViewController.h"
+#import "NSString+Helper.h"
+
+#define TAG_LABEL_LAST_UPDATED_DATE             65200
+#define TAG_LABEL_BATTERY                       65201
+#define TAG_IMG_ENGEER                       65202
+#define TAG_BUTTON_MILEAGE                       65203
+#define TAG_LABEL_OIL                           65204
+
+@interface ADSummaryViewController ()
+@property (nonatomic) BOOL firstShow;
+@property (nonatomic) UILabel *alertLabel;
+@property (nonatomic) UILabel *dtcLabel;
+@end
+
+@implementation ADSummaryViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil
+               bundle:(NSBundle *)nibBundleOrNil
+{
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+    
+        _dtcsModel = [[ADDTCsModel alloc] init];
+        _historyModel = [[ADHistoryModel alloc] init];
+        
+        _devicesModel = [[ADDevicesModel alloc] init];
+        [_devicesModel addObserver:self
+                        forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        
+        NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceSuccess:)
+                           name:ADDevicesModelRequestDeviceDetailSuccessNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceFail:)
+                           name:ADDevicesModelRequestDeviceDetailFailNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceTimeout:)
+                           name:ADDevicesModelRequestDeviceDetailTimeoutNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestLatestInfoSuccess:)
+                           name:ADDevicesModelRequestLatestInfoSuccessNotification
+                         object:nil];
+        
+        
+        [_dtcsModel addObserver:self
+                        forKeyPath:KVO_DTCS_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        
+        [_historyModel addObserver:self
+                        forKeyPath:KVO_ALERT_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestAlertsFail:)
+                                                     name:ADHistoryModelRequestAlertsFailNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestAlertsSuccess:)
+                                                     name:ADHistoryModelRequestAlertsSuccessNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(requestAlertsTimeout:)
+                                                     name:ADHistoryModelRequestAlertsTimeoutNotification
+                                                   object:nil];
+        
+        
+    }
+    return self;
+}
+
+
+- (void)dealloc
+{
+    [_devicesModel removeObserver:self
+                       forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME];
+    
+    NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+    
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailSuccessNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailFailNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailTimeoutNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestLatestInfoSuccessNotification
+                        object:nil];
+    
+    [_devicesModel cancel];
+
+    [_dtcsModel removeObserver:self
+                       forKeyPath:KVO_DTCS_PATH_NAME];
+    
+    [_historyModel removeObserver:self forKeyPath:KVO_ALERT_PATH_NAME];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADHistoryModelRequestAlertsFailNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADHistoryModelRequestAlertsSuccessNotification
+                                                  object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:ADHistoryModelRequestAlertsTimeoutNotification
+                                                  object:nil];
+    
+    [_dtcsModel cancel];
+    [_historyModel cancel];
+    
+    if (_mapView) {
+        _mapView = nil;
+    }
+    
+}
+
+-(void)nextOnKeyboard:(UITextField *)sender
+{
+    [self.mileageTextField resignFirstResponder];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.title=NSLocalizedStringFromTable(@"summaryKey",@"MyString", @"");
+    
+    UIBarButtonItem* initBarBtn=[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(InitButton)];
+    
+    self.navigationItem.rightBarButtonItem=initBarBtn;
+    
+    CGRect scrollViewRect = self.view.bounds;
+
+    UIScrollView *scrollView = [[UIScrollView alloc] initWithFrame:scrollViewRect];
+    scrollView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:scrollView];
+    
+    //gauge:
+    self.view.autoresizesSubviews = YES;
+    
+    UIView *viewOfGauge = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 170)];
+    
+    
+    
+    
+    
+    CGRect rectOfUpdateInfo = CGRectMake(0, 0, 320, 65);
+    UIView *viewOfUpdateInfo = [[UIView alloc] initWithFrame:rectOfUpdateInfo];
+    
+    
+    UILabel *labelOfLastUpdatedTitle = [[UILabel alloc] initWithFrame:CGRectMake(47, 0, 70, 50)];
+    labelOfLastUpdatedTitle.text = NSLocalizedStringFromTable(@"totalMileageKey",@"MyString", @"");//@"总里程";
+    labelOfLastUpdatedTitle.font = [UIFont boldSystemFontOfSize:20];
+    labelOfLastUpdatedTitle.textColor = DEFAULT_LABEL_COLOR;
+    labelOfLastUpdatedTitle.backgroundColor = [UIColor clearColor];
+    labelOfLastUpdatedTitle.textAlignment=UITextAlignmentCenter;
+    labelOfLastUpdatedTitle.numberOfLines=0;
+    [viewOfUpdateInfo addSubview:labelOfLastUpdatedTitle];
+    
+    
+    _editMileageView=[[UIView alloc]initWithFrame:CGRectMake(60, 40, 200, 100)];
+    [_editMileageView setAlpha:0.9];
+    [_editMileageView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"menu_back.png"]]];
+    [_editMileageView setHidden:YES];
+    [self.view addSubview:_editMileageView];
+    
+    _mileageTextField=[[UITextField alloc]initWithFrame:CGRectMake(25, 15, 150, 30)];
+    [_mileageTextField setBorderStyle:UITextBorderStyleRoundedRect];
+    _mileageTextField.placeholder=NSLocalizedStringFromTable(@"enterKey",@"MyString", @"");
+    _mileageTextField.textAlignment = UITextAlignmentCenter;
+    _mileageTextField.secureTextEntry=NO;
+    _mileageTextField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
+    [_mileageTextField setFont:[UIFont systemFontOfSize:20]];
+    [_editMileageView addSubview:_mileageTextField];
+    _mileageTextField.delegate = self;
+    
+    UIButton* sureButton=[[UIButton alloc]initWithFrame:CGRectMake(25, 60, 60, 30)];
+    [sureButton setTitle:NSLocalizedStringFromTable(@"submitKey",@"MyString", @"") forState:UIControlStateNormal];
+    [sureButton setBackgroundImage:[UIImage imageNamed:@"restartcheck.png"] forState:UIControlStateNormal];
+    [sureButton addTarget:self action:@selector(SureButton:) forControlEvents:UIControlEventTouchUpInside];
+    [_editMileageView addSubview:sureButton];
+    
+    UIButton* cancelButton=[[UIButton alloc]initWithFrame:CGRectMake(115, 60, 60, 30)];
+    [cancelButton setTitle:NSLocalizedStringFromTable(@"cancelKey",@"MyString", @"") forState:UIControlStateNormal];
+    [cancelButton setBackgroundImage:[UIImage imageNamed:@"click.png"] forState:UIControlStateNormal];
+    [cancelButton addTarget:self action:@selector(cancelButton:) forControlEvents:UIControlEventTouchUpInside];
+    [_editMileageView addSubview:cancelButton];
+    
+    [self.mileageTextField addTarget:self action:@selector(nextOnKeyboard:) forControlEvents:UIControlEventEditingDidEndOnExit];
+    
+    
+    _buttonMileage = [UIButton buttonWithType:UIButtonTypeCustom];
+    _buttonMileage.frame = CGRectMake(117, 0, 106, 50);
+    [_buttonMileage setTitle:[NSString stringWithFormat:@"%06d",[_devicesModel.deviceDetail.totalMileage intValue]] forState:UIControlStateNormal];
+    
+    _buttonMileage.titleLabel.font=[UIFont systemFontOfSize:25];
+    [_buttonMileage setBackgroundColor:[UIColor clearColor]];
+    [_buttonMileage setBackgroundImage:[UIImage imageNamed:@"summary_odometer.png"] forState:UIControlStateNormal];
+    [_buttonMileage addTarget:self action:@selector(EditMileageButton:) forControlEvents:UIControlEventTouchUpInside];
+    _buttonMileage.tag = TAG_BUTTON_MILEAGE;
+    [viewOfUpdateInfo addSubview:_buttonMileage];
+    
+
+    
+    UILabel *labelOfMile = [[UILabel alloc] initWithFrame:CGRectMake(223, 0, 50, 50)];
+    labelOfMile.text = NSLocalizedStringFromTable(@"kmKey",@"MyString", @"");//@"公里";
+    labelOfMile.font = [UIFont boldSystemFontOfSize:20];
+    labelOfMile.textColor = DEFAULT_LABEL_COLOR;
+    labelOfMile.backgroundColor = [UIColor clearColor];
+    labelOfMile.textAlignment=UITextAlignmentCenter;
+    labelOfMile.numberOfLines=0;
+    [viewOfUpdateInfo addSubview:labelOfMile];
+    
+    //最后更新时间
+    UILabel *labelOfLastUpdatedDate = [[UILabel alloc] initWithFrame:CGRectMake(0, 45, 320, 15)];
+    labelOfLastUpdatedDate.text = NSLocalizedString(@"", nil);//@"加载中";
+    labelOfLastUpdatedDate.tag = TAG_LABEL_LAST_UPDATED_DATE;
+    labelOfLastUpdatedDate.font = [UIFont systemFontOfSize:12];
+    labelOfLastUpdatedDate.textColor = DEFAULT_LABEL_COLOR;
+    labelOfLastUpdatedDate.backgroundColor = [UIColor clearColor];
+    labelOfLastUpdatedDate.textAlignment=UITextAlignmentCenter;
+    [viewOfUpdateInfo addSubview:labelOfLastUpdatedDate];
+    
+    CGRect rectLine = CGRectMake(0, 68, 320, 2);
+    UILabel *lineLabel = [[UILabel alloc]initWithFrame:rectLine];
+    lineLabel.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"summary_wline.png"]];
+    [viewOfUpdateInfo addSubview:lineLabel];
+    
+    [viewOfGauge addSubview:viewOfUpdateInfo];
+    
+    //引擎
+    CGRect rectOfSwitch = CGRectMake(0, 70, 100, 75);
+    UIView *viewOfSwitch = [[UIView alloc] initWithFrame:rectOfSwitch];
+    
+    _buttonIgn = [UIButton buttonWithType:UIButtonTypeCustom];
+    _buttonIgn.frame = CGRectMake(12, 0, 75, 75);
+    [_buttonIgn setBackgroundImage:[UIImage imageNamed:@"engine_stop.png"] forState:UIControlStateNormal];
+    _buttonIgn.tag = TAG_IMG_ENGEER;
+//    _buttonIgn.enabled=NO;
+    [viewOfSwitch addSubview:_buttonIgn];
+    [viewOfGauge addSubview:viewOfSwitch];
+    
+    CGRect rectHline1 = CGRectMake(100, 70, 3, 75);
+    UILabel *h1lineLabel = [[UILabel alloc]initWithFrame:rectHline1];
+    h1lineLabel.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"summary_hline.png"]];
+    [viewOfGauge addSubview:h1lineLabel];
+    
+    //油量
+    CGRect rectOfOilView = CGRectMake(103, 75, 110, 70);
+    UIView *viewOfOilGauge = [[UIView alloc] initWithFrame:rectOfOilView];
+    [viewOfGauge addSubview:viewOfOilGauge];
+    
+    UILabel *labelOfOil = [[UILabel alloc] initWithFrame:CGRectMake(103, 120, 110, 20)];
+    labelOfOil.text = NSLocalizedStringFromTable(@"oilKey",@"MyString", @"");
+    labelOfOil.font = [UIFont systemFontOfSize:12];
+    labelOfOil.textColor = DEFAULT_LABEL_COLOR;
+    labelOfOil.tag =TAG_LABEL_OIL;
+    labelOfOil.textAlignment=UITextAlignmentCenter;
+    labelOfOil.backgroundColor = [UIColor clearColor];
+    [viewOfGauge addSubview:labelOfOil];
+    
+    CGRect rectHline2 = CGRectMake(213, 70, 3, 75);
+    UILabel *h2lineLabel = [[UILabel alloc]initWithFrame:rectHline2];
+    h2lineLabel.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"summary_hline.png"]];
+    
+    
+    
+    [viewOfGauge addSubview:h2lineLabel];
+    
+    _oilGaugeView = [[ADGaugeView alloc] initWithFrame:CGRectMake(12, 0, 85, 50)
+                                              minValue:0
+                                              maxValue:100
+                                             minDegree:-78
+                                             maxDegree:78
+                                            totalMarks:10
+                                           pointerSize:CGSizeMake(3.5, 26.5)
+                                               bgImage:[UIImage imageNamed:@"oil.png"]
+                                          pointerImage:[UIImage imageNamed:@"guide.png"]
+                                             initValue:0
+                                        pointerYOffset:20];
+    [viewOfOilGauge addSubview:_oilGaugeView];
+    
+    //电池
+    CGRect rectOfBattery = CGRectMake(216, 75, 104, 75);
+    UIView *viewOfBattery = [[UIView alloc] initWithFrame:rectOfBattery];
+
+    _batteryView = [[ADGaugeView alloc] initWithFrame:CGRectMake(10, 0, 85, 50)
+                                              minValue:0
+                                              maxValue:8
+                                             minDegree:-78
+                                             maxDegree:78
+                                            totalMarks:10
+                                           pointerSize:CGSizeMake(3.5, 26.5)
+                                               bgImage:[UIImage imageNamed:@"voltage.png"]
+                                          pointerImage:[UIImage imageNamed:@"guide.png"]
+                                             initValue:0
+                                        pointerYOffset:20];
+    [viewOfBattery addSubview:_batteryView];
+    
+//    UIImageView *imageViewOfBattery = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"summary_battery_indicator.png"]];
+//    imageViewOfBattery.frame = CGRectMake(17, 10, 76, 50);
+//    [viewOfBattery addSubview:imageViewOfBattery];
+    
+    UILabel *labelOfBattery = [[UILabel alloc] initWithFrame:CGRectMake(0, 45, 110, 20)];
+    labelOfBattery.text = NSLocalizedStringFromTable(@"voltageKey",@"MyString", @"");
+    labelOfBattery.tag = TAG_LABEL_BATTERY;
+    labelOfBattery.font = [UIFont systemFontOfSize:12];
+    labelOfBattery.textColor = DEFAULT_LABEL_COLOR;
+    labelOfBattery.textAlignment=UITextAlignmentCenter;
+    labelOfBattery.backgroundColor = [UIColor clearColor];
+    [viewOfBattery addSubview:labelOfBattery];
+    
+    [viewOfGauge addSubview:viewOfBattery];
+    [scrollView addSubview:viewOfGauge];
+    
+    //地图
+    _mapView = [[BMKMapView alloc] initWithFrame:CGRectMake(0, 145, 320, 115)];
+    UITapGestureRecognizer *tapGes = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(mapTap:)];
+    tapGes.numberOfTapsRequired = 1;
+    [_mapView addGestureRecognizer:tapGes];
+    
+    _mapView.delegate = self;
+    _mapView.zoomEnabled = YES;
+    _mapView.scrollEnabled = YES;
+    [scrollView addSubview:_mapView];
+    
+    _locationLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 240, 320, 20)];
+    _locationLabel.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"map_summary.png"]];
+    _locationLabel.text=NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @"");
+//    _locationLabel.alpha=0.75;
+    _locationLabel.textColor=[UIColor darkGrayColor];
+    _locationLabel.font=[UIFont systemFontOfSize:12];
+    [scrollView addSubview:_locationLabel];
+    
+    //alert:
+    UIImageView *imageViewOfWarn=[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"summary_alert_icon.png"]];
+    imageViewOfWarn.frame=CGRectMake(0, 260, 31, 31);
+    [scrollView addSubview:imageViewOfWarn];
+    
+    UILabel *alertLabel = [[UILabel alloc]initWithFrame:CGRectMake(31, 260, 125, 31)];
+    alertLabel.text=NSLocalizedStringFromTable(@"alarmKey",@"MyString", @"");
+    alertLabel.backgroundColor=[UIColor clearColor];
+    alertLabel.font = [UIFont boldSystemFontOfSize:16];
+    alertLabel.textColor = DEFAULT_LABEL_COLOR;
+    [scrollView addSubview:alertLabel];
+    
+    
+    _tableViewOfAlerts = [[UITableView alloc] initWithFrame:CGRectMake(5, 291, 150, 125) style:UITableViewStylePlain];
+
+    _tableViewOfAlerts.separatorColor = [UIColor clearColor];
+    _tableViewOfAlerts.separatorStyle = UITableViewCellSeparatorStyleNone;
+    _tableViewOfAlerts.backgroundView = nil;
+    _tableViewOfAlerts.backgroundColor = [UIColor clearColor];
+    _tableViewOfAlerts.delegate = self;
+    _tableViewOfAlerts.dataSource = self;
+    _tableViewOfAlerts.scrollEnabled = NO;
+    _tableViewOfAlerts.separatorColor=[UIColor clearColor];
+    [scrollView addSubview:_tableViewOfAlerts];
+    
+    _alertLabel = [[UILabel alloc]initWithFrame:CGRectMake(5, 320, 150, 30)];
+    _alertLabel.text=@"DTC故障码未上报";
+    _alertLabel.backgroundColor=[UIColor clearColor];
+    _alertLabel.textColor=[UIColor grayColor];
+    _alertLabel.font=[UIFont boldSystemFontOfSize:16];
+    _alertLabel.textAlignment=UITextAlignmentCenter;
+    _alertLabel.hidden=YES;
+    _dtcLabel = [[UILabel alloc]initWithFrame:CGRectMake(165, 320, 150, 30)];
+    _dtcLabel.text = @"DTC故障码未上报";
+    _dtcLabel.textColor=[UIColor grayColor];
+    _dtcLabel.font=[UIFont boldSystemFontOfSize:16];
+    _dtcLabel.textAlignment=UITextAlignmentCenter;
+    _dtcLabel.backgroundColor=[UIColor clearColor];
+    _dtcLabel.hidden=YES;
+    [scrollView addSubview:_alertLabel];
+    [scrollView addSubview:_dtcLabel];
+    
+    CGRect rectHline3 = CGRectMake(160, 260, 3, 156);
+    UILabel *h3lineLabel = [[UILabel alloc]initWithFrame:rectHline3];
+    h3lineLabel.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"summary_hline.png"]];
+    [scrollView addSubview:h3lineLabel];
+    
+    UIImageView *imageViewOfCar =[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"summary_dtc_icon.png"]];
+    imageViewOfCar.frame=CGRectMake(165, 260, 31, 31);
+    [scrollView addSubview:imageViewOfCar];
+    
+    UILabel *dtcLabel = [[UILabel alloc]initWithFrame:CGRectMake(191, 260, 125, 31)];
+    dtcLabel.text=@"DTC";
+    dtcLabel.backgroundColor=[UIColor clearColor];
+    dtcLabel.font = [UIFont boldSystemFontOfSize:16];
+    dtcLabel.textColor = DEFAULT_LABEL_COLOR;
+    [scrollView addSubview:dtcLabel];
+    
+    //dtcs:
+    _tableViewOfDTCs = [[UITableView alloc] initWithFrame:CGRectMake(165, 291, 150, 125) style:UITableViewStylePlain];
+    _tableViewOfDTCs.separatorColor = [UIColor clearColor];
+    _tableViewOfDTCs.separatorStyle = UITableViewCellSeparatorStyleNone;
+    _tableViewOfDTCs.backgroundView = [[UIView alloc] init];
+    _tableViewOfDTCs.backgroundColor = [UIColor clearColor];
+    _tableViewOfDTCs.delegate = self;
+    _tableViewOfDTCs.dataSource = self;
+    _tableViewOfDTCs.scrollEnabled = NO;
+    _tableViewOfDTCs.separatorColor = [UIColor clearColor];
+    [scrollView addSubview:_tableViewOfDTCs];
+
+    
+    /************************************************************************************************/
+    UISwipeGestureRecognizer *leftRecognizer=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(handleSwipeFrom:)];
+    [leftRecognizer setDirection:UISwipeGestureRecognizerDirectionLeft];
+    [self.view addGestureRecognizer:leftRecognizer];
+    /************************************************************************************************/
+    
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+//    [_devicesModel requestDetailDeviceInfoWithArguments:[NSArray arrayWithObjects:@"",[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID, nil] isContinue:YES];
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"GMT"]];
+    NSLog(@"%@",[dateFormatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]]);
+    
+    [self requestLatestInfoWithResultTime:[dateFormatter stringFromDate:[NSDate dateWithTimeIntervalSince1970:0]]];
+    
+    self.firstShow=YES;
+    
+}
+
+- (void)requestLatestInfoWithResultTime:(NSString *)time{
+    [_devicesModel requestLatestInfoWithArguments:[NSArray arrayWithObjects:[ADSingletonUtil sharedInstance].globalUserBase.acctID,[ADSingletonUtil sharedInstance].globalUserBase.userID,[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID,time, nil]];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [self.navigationController setNavigationBarHidden:NO];
+    _mapView.delegate = self;
+    if(_devicesModel.deviceDetail==nil){
+        [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(31.2105889593161, 121.492910330211)];
+        [_mapView setZoomLevel:12];
+    }
+    
+    
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    _mapView.delegate = nil; // 不用时，置nil
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+}
+
+
+
+
+- (void)handleSwipeFrom:(UISwipeGestureRecognizer*)recognizer
+{
+    //    NSLog(@"SUcces");
+    if (recognizer.direction==UISwipeGestureRecognizerDirectionLeft) {
+        CATransition *animation=[CATransition animation];
+        animation.duration=1.5f;
+        animation.timingFunction=UIViewAnimationCurveEaseInOut;
+        animation.type=@"suckEffect";
+        animation.subtype=kCATransitionFromRight;
+        CarAssistantViewController *middle=[[CarAssistantViewController alloc]init];
+        [middle.view setFrame:CGRectMake(0, 0, 320, 480)];
+        [self.view.superview.layer addAnimation:animation forKey:nil];
+        [self.navigationController pushViewController:middle animated:YES];
+//        [self.navigationController setNavigationBarHidden:YES];
+    }
+}
+
+- (void)mapTap:(UIGestureRecognizer *)ges
+{
+    [ADSingletonUtil sharedInstance].selectMenuIndex=1;
+    [_devicesModel cancel];
+    UIViewController *viewController = [[NSClassFromString(@"ADiPhoneLocationViewController") alloc] initWithNibName:nil bundle:nil];
+    ADNavigationController *navigationController = [ADNavigationController navigationControllerWithRootViewController:viewController];
+    CGRect frame = self.slidingController.topViewController.view.frame;
+    self.slidingController.topViewController = navigationController;
+    self.slidingController.topViewController.view.frame = frame;
+    [self.slidingController resetTopView];
+}
+
+#pragma mark -Button Action
+
+-(void)InitButton{
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+    [_devicesModel requestDetailDeviceInfoWithArguments:[NSArray arrayWithObjects:@"",[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID, nil] isContinue:NO];
+    
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [self.view endEditing:YES];
+}
+
+-(void)EditMileageButton:(id)sender{
+    [_editMileageView setHidden:NO];
+}
+
+-(void)cancelButton:(id)sender{
+    [_editMileageView setHidden:YES];
+    [self.mileageTextField resignFirstResponder];
+}
+
+-(void)SureButton:(id)sender{
+    NSString* total=_mileageTextField.text;
+    NSString* dvID=[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID;
+    
+    NSDate *  senddate=[NSDate date];
+    
+    NSDateFormatter  *dateformatter=[[NSDateFormatter alloc] init];
+    
+    [dateformatter setDateFormat:@"YYYY-MM-dd-HH-mm-ss"];
+    
+    NSString *  locationString=[dateformatter stringFromDate:senddate];
+    
+    
+    [self nextOnKeyboard:nil];
+    
+    [_mileageTextField resignFirstResponder];
+    
+}
+
+-(void)handleSetTotalMilageData:(NSDictionary *)dictionary{
+    [_editMileageView setHidden:YES];
+    NSString* resultCode=[dictionary objectForKey:@"resultCode"];
+    if ([resultCode isEqual:@"200"]) {
+        NSLog(@"设置里程数成功");
+        [_devicesModel requestDetailDeviceInfoWithArguments:[NSArray arrayWithObjects:@"",[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID, nil] isContinue:NO];
+    }else{
+        NSLog(@"设置里程数发送系统错误");
+    }
+    
+}
+#pragma mark - UITableViewDelegate
+
+#pragma mark - UITableViewDataSource
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    NSInteger count = 0;
+    
+    if (tableView == _tableViewOfAlerts) {
+        if (!_historyModel.alerts) {
+            return 0;
+        }
+        count = [_historyModel.alerts count] > 3 ? 3 : [_historyModel.alerts count];
+    } else if (tableView == _tableViewOfDTCs) {
+        if (!_dtcsModel.dtcs) {
+            return 0;
+        }
+        ADDTCBase*dtcbase=[_dtcsModel.dtcs objectAtIndex:0];
+        count = dtcbase.Num_of_DTC > 3 ? 3 : dtcbase.Num_of_DTC;
+        if(dtcbase.Num_of_DTC==0||dtcbase.Num_of_DTC==255){
+            count=1;
+        }
+    }
+    
+    return count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell;
+    NSString *idStr;
+    if (tableView == _tableViewOfAlerts)
+    {
+        idStr = @"ADSummaryViewController.tableViewOfAlerts.cell";
+        cell = [_tableViewOfAlerts dequeueReusableCellWithIdentifier:idStr];
+        NSDictionary *historyPoint = [_historyModel.alerts objectAtIndex:indexPath.row];
+//        if (!cell) {
+            cell = [[ADAlertCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:idStr historyPoint:historyPoint];
+//        }
+        [(ADAlertCell *)cell updateUIByHistoryPoint:historyPoint];
+        
+    }
+    
+    if (tableView == _tableViewOfDTCs)
+    {
+        idStr = @"ADSummaryViewController.tableViewOfDTCs.cell";
+        cell = [_tableViewOfDTCs dequeueReusableCellWithIdentifier:idStr];
+        ADDTCBase *dtcBase = [_dtcsModel.dtcs objectAtIndex:0];
+//        if (!cell) {
+            cell = [[ADDTCCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:idStr dtcBase:dtcBase];
+//        }
+        cell.detailTextLabel.text=NSLocalizedStringFromTable(@"noDescriptionKey",@"MyString", @"");
+        if (indexPath.row==0) {
+            if(dtcBase.Num_of_DTC==0||dtcBase.Num_of_DTC==255){
+                cell.textLabel.text=NSLocalizedStringFromTable(@"noAlarmKey",@"MyString", @"");
+                
+                cell.detailTextLabel.text=[NSString stringWithFormat:@"%@",dtcBase.readDate];
+            }else{
+                cell.textLabel.text=[NSString stringWithFormat:@"%@ %@",[dtcBase.DTC_1 substringToIndex:5],[NSString stringWithFormat:@"%@",dtcBase.readDate]];
+                cell.detailTextLabel.text=[dtcBase.DTC_1 substringFromIndex:7];
+            }
+            
+        }else if (indexPath.row==1){
+            cell.textLabel.text=[dtcBase.DTC_2 substringToIndex:5];
+            cell.detailTextLabel.text=[dtcBase.DTC_2 substringFromIndex:7];
+        }else if (indexPath.row==2){
+            cell.textLabel.text=[dtcBase.DTC_3 substringToIndex:5];
+            cell.detailTextLabel.text=[dtcBase.DTC_3 substringFromIndex:7];
+}
+        
+    }
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,40, cell.bounds.size.width, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [cell addSubview:lineView];
+    
+    cell.textLabel.textColor=DEFAULT_LABEL_COLOR;
+    cell.detailTextLabel.font=[UIFont systemFontOfSize:12];
+    cell.selectionStyle=UITableViewCellSelectionStyleGray;
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 41.0;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NSString *className;
+    if (tableView == _tableViewOfAlerts) {
+        className = @"ADAlertViewController";
+    } else if (tableView == _tableViewOfDTCs) {
+        className = @"ADDTCsViewController";
+    } else {
+        NSAssert(0, @"not handle tableview");
+    }
+    UIViewController *viewController = [[NSClassFromString(className) alloc] initWithNibName:nil bundle:nil];
+    [self.navigationController pushViewController:viewController animated:YES];
+}
+
+- (void)locationManager:(CLLocationManager *)manager
+     didUpdateLocations:(NSArray *)locations
+{
+    CLLocation *userLocation = [locations objectAtIndex:0];
+    [_mapView setCenterCoordinate:userLocation.coordinate animated:YES];
+}
+
+- (void)requestDeviceDTCs:(NSString *)aDeviceID
+{
+    [_dtcsModel requestDTCsWithArguments:[NSArray arrayWithObjects:aDeviceID, @"0", nil]];
+}
+
+- (void)requestDeviceAlerts:(NSString *)aDeviceID
+{
+    [_historyModel requestAlertsWithDeviceID:aDeviceID
+                                   startDate:[NSDate dateWithTimeIntervalSince1970:0]
+                                     endDate:[NSDate localDate]
+                                        type:@"1"
+                                         row:@"3"
+                                        page:@"1"];
+}
+
+- (void)updateDetailUI
+{
+    NSString *number =[NSString stringWithFormat:@"%06d",[_devicesModel.deviceDetail.totalMileage intValue]];
+    [_buttonMileage setTitle:number forState:UIControlStateNormal];
+    
+    if([_devicesModel.deviceDetail.ign isEqualToString:@"0"]){
+        [_buttonIgn setBackgroundImage:[UIImage imageNamed:@"engine_stop.png"] forState:UIControlStateNormal];
+    }else{
+        [_buttonIgn setBackgroundImage:[UIImage imageNamed:@"engine_start.png"] forState:UIControlStateNormal];
+    }
+
+    float oilV = _devicesModel.deviceDetail.fuel_level_now;
+    UILabel *labelOfOil = (UILabel *)[self.view viewWithTag:TAG_LABEL_OIL];
+    labelOfOil.text = [NSString stringWithFormat:@"%@%.0f%%",NSLocalizedStringFromTable(@"oilKey",@"MyString", @""),oilV];
+    [_oilGaugeView runToValue:oilV animated:YES hasEffect:YES];
+    
+    UILabel *labelOfDate = (UILabel*)[self.view viewWithTag:TAG_LABEL_LAST_UPDATED_DATE];
+    NSString *stringTime=_devicesModel.deviceDetail.gpsTime;
+    NSString *stringDate = _devicesModel.deviceDetail.gpsDate;
+    NSDate *date=[[NSString stringWithFormat:@"%@ %@",stringDate,stringTime] dateFromStringHasTime:YES];
+    NSString * strFormatDate=[date toStringHasTime:YES];
+    labelOfDate.text=[NSString stringWithFormat:@"%@：%@",NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+    
+//    NSDate * date = [NSDate date];
+//    NSTimeInterval sec = [date timeIntervalSinceNow];
+//    NSDate * currentDate = [[NSDate alloc] initWithTimeIntervalSinceNow:sec];
+//    //设置时间输出格式：
+//    NSDateFormatter * df = [[NSDateFormatter alloc] init ];
+//    [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+//    NSString * na = [df stringFromDate:currentDate];
+//    labelOfDate.text =[NSString stringWithFormat:@"最后更新：%@",na] ;
+    
+    UILabel *labelOfBattery = (UILabel *)[self.view viewWithTag:TAG_LABEL_BATTERY];
+    labelOfBattery.text = [NSString stringWithFormat:@"%@%.1fV",NSLocalizedStringFromTable(@"voltageKey",@"MyString", @""),_devicesModel.deviceDetail.batt_level];
+    [_batteryView runToValue:_devicesModel.deviceDetail.batt_level-8 animated:YES hasEffect:YES];
+    
+//    [self requestDeviceDTCs:_devicesModel.deviceDetail.deviceID];
+//    [self requestDeviceAlerts:_devicesModel.deviceDetail.deviceID];
+    
+    if([_mapView.annotations count]!=0){
+        [_mapView removeAnnotations:_mapView.annotations];
+    }
+    BMKPointAnnotation *annotation = [[BMKPointAnnotation alloc] init];
+    CLLocationCoordinate2D coor;
+    coor.latitude = _devicesModel.deviceDetail.latitude;
+    coor.longitude = _devicesModel.deviceDetail.longitude;
+    if(coor.latitude==0&&coor.longitude==0){
+        if(_devicesModel.deviceDetail.lastLocation==nil){
+//            NSLog(@"2222222");
+            _locationLabel.text =NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+        }else{
+            coor.latitude = [[_devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"] floatValue];
+            coor.longitude = [[_devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"] floatValue];
+            NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+            //纠偏
+            CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+            annotation.coordinate = coordinate;
+//            [_mapView addAnnotation:annotation];
+            [_mapView setZoomLevel:16];
+            [_mapView setCenterCoordinate:coordinate animated:YES];
+            _locationLabel.text=[NSString stringWithFormat:@"%@：%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),[_devicesModel.deviceDetail.lastLocation objectForKey:@"address_num"]];
+        }
+       
+    }else{
+        NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+        //纠偏
+        CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+        annotation.coordinate = coordinate;
+        [_mapView addAnnotation:annotation];
+        [_mapView setZoomLevel:16];
+        [_mapView setCenterCoordinate:coordinate animated:YES];
+        _locationLabel.text=[NSString stringWithFormat:@"%@：%@%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),_devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"nearKey",@"MyString", @"")];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    if (object == _devicesModel) {
+        if ([keyPath isEqualToString:KVO_DEVICE_DETAIL_PATH_NAME]) {
+            if(_devicesModel.deviceDetail==nil){
+                [IVToastHUD showAsToastErrorWithStatus:NSLocalizedStringFromTable(@"code201",@"MyString", @"")];
+            }else{
+                [self updateDetailUI];
+            }
+            return;
+        }
+    }else if (object == _dtcsModel) {
+        if ([keyPath isEqualToString:KVO_DTCS_PATH_NAME]) {
+            
+//            CGRect rectOfTableView = _tableViewOfDTCs.frame;
+//            rectOfTableView.size.height = [self tableView:_tableViewOfDTCs numberOfRowsInSection:0] * 45.0 + 2 * 10.0;
+            [_tableViewOfDTCs reloadData];
+
+            return;
+        }
+    } else if (object == _historyModel) {
+        if ([keyPath isEqualToString:KVO_ALERT_PATH_NAME]) {
+//            CGRect rectOfTableView = _tableViewOfAlerts.frame;
+//            rectOfTableView.size.height = [self tableView:_tableViewOfAlerts numberOfRowsInSection:0] * 45.0 + 2 * 10.0;
+//            _tableViewOfAlerts.frame = rectOfTableView;
+            
+            [_tableViewOfAlerts reloadData];
+            return;
+        }
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+#pragma mark - Request handle
+
+- (void)requestAlertsFail:(NSNotification *)aNoti
+{
+    
+}
+
+- (void)requestAlertsSuccess:(NSNotification *)aNoti
+{
+    
+}
+
+- (void)requestAlertsTimeout:(NSNotification *)aNoti
+{
+    
+}
+
+- (void)requestLatestInfoSuccess:(NSNotification *)aNoti{
+    
+    
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+    NSDictionary *latestInfo=aNoti.userInfo;
+    
+    if([[latestInfo objectForKey:@"alertNum"] intValue]>0){
+        NSLog(@"requestLatestInfoSuccess %d",[[latestInfo objectForKey:@"alertNum"] intValue]);
+        [self requestDeviceAlerts:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+        _alertLabel.hidden=YES;
+    }else{
+        if (self.firstShow) {
+            _alertLabel.hidden=NO;
+        }
+    }
+    if ([[latestInfo objectForKey:@"dtcNum"] intValue]>0) {
+        NSLog(@"requestLatestInfoSuccess %d",[[latestInfo objectForKey:@"dtcNum"] intValue]);
+        [self requestDeviceDTCs:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+        _dtcLabel.hidden=YES;
+    }else{
+        if(self.firstShow){
+            _dtcLabel.hidden=NO;
+        }
+    }
+    if ([[latestInfo objectForKey:@"locNum"] intValue]>0) {
+        NSLog(@"requestLatestInfoSuccess %d",[[latestInfo objectForKey:@"locNum"] intValue]);
+        [_devicesModel requestDetailDeviceInfoWithArguments:[NSArray arrayWithObjects:@"",[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID, nil] isContinue:NO];
+    }else{
+        if(self.firstShow){
+            _locationLabel.text=NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+        }
+    }
+    
+    [self performSelector:@selector(requestLatestInfoWithResultTime:) withObject:[latestInfo objectForKey:@"resultTime"] afterDelay:20];
+    
+    self.firstShow=NO;
+//    sleep(20);
+    
+}
+
+
+- (void)requestDetailDeviceSuccess:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestDetailDeviceFail:(NSNotification *)aNoti
+{
+//    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+    _locationLabel.text=NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+}
+
+- (void)requestDetailDeviceTimeout:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (BMKAnnotationView *)mapView:(BMKMapView *)mapView
+             viewForAnnotation:(id<BMKAnnotation>)annotation
+{
+    if ([annotation isKindOfClass:[BMKPointAnnotation class]]) {
+        BMKPinAnnotationView *newAnnotationView = [[BMKPinAnnotationView alloc] initWithAnnotation:annotation
+                                                                                   reuseIdentifier:@"myAnnotation"];
+//        newAnnotationView.pinColor = BMKPinAnnotationColorRed;
+        newAnnotationView.animatesDrop = NO;
+        newAnnotationView.image = [UIImage imageNamed:@"GPS_point.png"];
+        return newAnnotationView;
+    }
+    return nil;
+}
+
+@end

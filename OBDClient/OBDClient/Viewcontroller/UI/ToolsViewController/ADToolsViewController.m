@@ -1,0 +1,263 @@
+//
+//  ADToolsViewController.m
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-18.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADToolsViewController.h"
+#import "ADCarManagerItemViewController.h"
+#import "ADViolationViewController.h"
+#import "ADVehicleSafeSettingViewController.h"
+#import "ADSharedModel.h"
+#import "ADTrafficViewController.h"
+
+@interface ADToolsViewController ()
+@property (nonatomic) NSArray *itemData;
+@property (nonatomic) UITableView * tableView;
+@property (nonatomic) ADSharedModel *sharedModel;
+@property (nonatomic) UIImage *shareImage;
+@end
+
+@implementation ADToolsViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _sharedModel = [[ADSharedModel alloc]init];
+//        _shareImage = [[UIImage alloc]init];
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    _itemData=@[NSLocalizedStringFromTable(@"ViolationqueriesKey",@"MyString", @""),
+//                NSLocalizedStringFromTable(@"PremiumcalculationKey",@"MyString", @""),
+                NSLocalizedStringFromTable(@"SafeSettingInfoKey",@"MyString", @""),@"拍照分享",@"交通标志"];
+    
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT) style:UITableViewStylePlain];
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.backgroundView=nil;
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    _tableView.separatorColor = [UIColor clearColor];
+    [self.view addSubview:_tableView];
+    
+    if (IOS7_OR_LATER) {
+        CGRect frame=self.tableView.frame;
+        frame.origin.y+=64;
+        [self.tableView setFrame:frame];
+		[self setExtraCellLineHidden:self.tableView];
+    }
+
+    // Do any additional setup after loading the view from its nib.
+}
+
+
+-(void)setExtraCellLineHidden: (UITableView *)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    self.title=NSLocalizedStringFromTable(@"toolBoxKey",@"MyString", @"");
+}
+
+#pragma mark - Table view data source
+// 有几个区
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+//每个区里有几行
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return _itemData.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 41;
+}
+
+//某区某行显示什么
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    }
+    
+    cell.selectionStyle=UITableViewCellSelectionStyleGray;
+    
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,40, WIDTH, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [cell addSubview:lineView];
+    
+    UIColor *labelColor = COLOR_RGB(255, 255, 255);
+    cell.textLabel.textColor = labelColor;
+    cell.textLabel.text = _itemData[indexPath.row];
+    cell.textLabel.font=[UIFont systemFontOfSize:16];
+    cell.backgroundColor=[UIColor whiteColor];
+    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    
+    UIButton *buttonRight = [UIButton buttonWithType:UIButtonTypeCustom];
+    buttonRight.frame = CGRectMake(0, 10, 6, 6.5);
+    [buttonRight setBackgroundImage:[UIImage imageNamed:@"vehicle_list_right.png"] forState:UIControlStateNormal];
+    cell.accessoryView=buttonRight;
+    
+    cell.backgroundColor=[UIColor clearColor];
+    // Configure the cell...
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 1;
+}
+
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if(indexPath.row==0){
+        ADViolationViewController*vioToolView=[[ADViolationViewController alloc]init];
+        vioToolView.toolTitle=_itemData[indexPath.row];
+        [self.navigationController pushViewController:vioToolView animated:YES];
+    }else if (indexPath.row==1){
+        BOOL bindFlag=[ADSingletonUtil sharedInstance].currentDeviceBase.bindedFlag;
+        if(!bindFlag){
+            [IVToastHUD showAsToastErrorWithStatus:NSLocalizedStringFromTable(@"unbindInfo",@"MyString", @"")];
+            return;
+        }
+        ADVehicleSafeSettingViewController *safeView = [[ADVehicleSafeSettingViewController alloc]init];
+        [self.navigationController pushViewController:safeView animated:YES];
+    }else if (indexPath.row==2){
+        self.arr=[[NSMutableArray alloc]initWithCapacity:0];
+        if ([self.arr count]>0) {
+            [self.arr removeAllObjects];
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //查询失败
+            ALAssetsLibraryAccessFailureBlock failureblock = ^(NSError *myerror){
+                NSLog(@"test is fail");
+            };
+            ALAssetsGroupEnumerationResultsBlock groupEnumerAtion = ^(ALAsset *result, NSUInteger index, BOOL *stop){
+                if (result!=NULL) {
+                    if ([[result valueForProperty:ALAssetPropertyType] isEqualToString:ALAssetTypePhoto]) {
+                        //查询到照片
+                        [self.arr addObject:result.defaultRepresentation.filename];
+                    }
+                }else{
+                    //查询照片完成
+                    NSLog(@"the count is %d",[self.arr count]);
+                    if ([self arr] > 0) {
+                        UIImagePickerController * imagePicker = [[UIImagePickerController alloc]init];
+                        imagePicker.sourceType=UIImagePickerControllerSourceTypePhotoLibrary;
+                        NSArray* temp_MediaTypes=[UIImagePickerController availableMediaTypesForSourceType:imagePicker.sourceType];
+                        imagePicker.mediaTypes=temp_MediaTypes;
+                        imagePicker.delegate=self;
+                        imagePicker.allowsEditing=YES;
+                        [self presentModalViewController:imagePicker animated:NO];
+                        
+                    }else{
+                        NSLog(@"没有照片");
+                    }
+
+                }
+            };
+            ALAssetsLibraryGroupsEnumerationResultsBlock
+            libraryGroupsEnumeration = ^(ALAssetsGroup* group, BOOL* stop){
+                if (group!=nil) {
+                    [group enumerateAssetsUsingBlock:groupEnumerAtion];
+                }
+            };
+            ALAssetsLibrary* library = [[ALAssetsLibrary alloc] init];
+            [library enumerateGroupsWithTypes:ALAssetsGroupAll
+                                   usingBlock:libraryGroupsEnumeration
+                                 failureBlock:failureblock];
+            
+        });
+
+        
+        
+//        UIPopoverController* popover=[[UIPopoverController alloc]initWithContentViewController:imagePicker];
+//        popover.delegate=self;
+//        [popover presentPopoverFromRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        
+//        imagePicker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+//        imagePicker.allowsEditing = YES;
+//        imagePicker.delegate = self;
+//        [[UIApplication sharedApplication] setStatusBarHidden:YES];
+//        [self presentViewController:imagePicker animated:YES completion:nil];
+//        [self.navigationController pushViewController:imagePicker animated:YES];
+    }else if(indexPath.row==3){
+        ADTrafficViewController *trafficVC = [[ADTrafficViewController alloc] init];
+        [self.navigationController pushViewController:trafficVC animated:YES];
+    }else{
+        ADCarManagerItemViewController *customView=[[ADCarManagerItemViewController alloc]init];
+        [self.navigationController pushViewController:customView animated:YES];
+    }
+    
+}
+
+//- (BOOL)popoverControllerShouldDismissPopover:(UIPopoverController *)popoverController{
+//    return YES;
+//}
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingImage:(UIImage *)image editingInfo:(NSDictionary *)editingInfo{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+    _shareImage = image;
+//    UIActionSheet * actionSheet = [[UIActionSheet alloc]initWithTitle:@"选择微信分享方式" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"分享给微信好友" otherButtonTitles:@"分享到朋友圈", nil];
+//    actionSheet.delegate=self;
+//    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+//    [actionSheet showInView:self.view];
+    [self performSelector:@selector(chooseImage) withObject:nil afterDelay:0.1f];
+}
+
+- (void)chooseImage
+{
+    UIActionSheet * actionSheet = [[UIActionSheet alloc]initWithTitle:@"选择微信分享方式" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"分享给微信好友" otherButtonTitles:@"分享到朋友圈", nil];
+    actionSheet.delegate=self;
+    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [actionSheet showInView:self.view];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+    
+    switch (buttonIndex) {
+        case 0:
+            [_sharedModel changeScene:0];
+            [_sharedModel sendImageContentWithImage:_shareImage];
+            break;
+        case 1:
+            [_sharedModel changeScene:1];
+            [_sharedModel sendImageContentWithImage:_shareImage];
+            break;
+        default:
+            break;
+    }
+    
+}
+
+@end

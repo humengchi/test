@@ -1,0 +1,79 @@
+//
+//  ADUserFriendsViewController.m
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-18.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADUserFriendsViewController.h"
+#import "ADUserFriendsCell.h"
+
+@interface ADUserFriendsViewController ()
+
+@end
+
+@implementation ADUserFriendsViewController
+@synthesize theArray = _theArray;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        _theArray = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    myTableView.backgroundColor = [UIColor blackColor];
+    [_theArray addObjectsFromArray:@[@"上海车友群",@"江苏车友群",@"浙江车友群",@"广东车友群",@"安徽车友群"]];
+    // Do any additional setup after loading the view from its nib.
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    self.title=@"车友群列表";
+    self.view.backgroundColor=[UIColor blackColor];
+}
+
+- (IBAction)JumpButton:(id)sender {
+    ADGroupChatViewController* groupchat=[[ADGroupChatViewController alloc]initWithNibName:@"ADGroupChatViewController" bundle:nil];
+    [self.navigationController pushViewController:groupchat animated:NO];
+}
+
+#pragma mark -UITableViewDelegate
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return _theArray.count;
+}
+
+- (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *indentify = @"ADUserFriendsCell";
+    ADUserFriendsCell *cell = (ADUserFriendsCell*)[tableView dequeueReusableCellWithIdentifier:indentify];
+    if(cell==nil){
+        cell = [[ADUserFriendsCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:indentify];
+    }
+    cell.groupName.text = [_theArray objectAtIndex:indexPath.row];
+    cell.backgroundColor = [UIColor blackColor];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    ADGroupChatViewController* groupchat=[[ADGroupChatViewController alloc]initWithNibName:@"ADGroupChatViewController" bundle:nil];
+    groupchat.title = [_theArray objectAtIndex:indexPath.row];
+    [self.navigationController pushViewController:groupchat animated:NO];
+}
+
+@end

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5198/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController
+END
+ADAuthManageViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 152
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthManageViewController.xib
+END
+ADAuthUserListViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 154
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthUserListViewController.xib
+END
+ADAuthManageViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthManageViewController.h
+END
+ADAuthUserListViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 152
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthUserListViewController.h
+END
+ADAuthManageViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthManageViewController.m
+END
+ADAuthUserListViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 152
+/svn/LBS/!svn/ver/5198/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/AuthManageViewController/ADAuthUserListViewController.m
+END

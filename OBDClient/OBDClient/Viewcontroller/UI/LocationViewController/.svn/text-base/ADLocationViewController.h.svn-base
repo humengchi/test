@@ -1,0 +1,66 @@
+//
+//  ADLocationViewController.h
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "BMapKit.h"
+#import "ADiPhoneGeofenceViewController.h"
+#import "ADGaugeView.h"
+#import "ADDeviceDetail.h"
+#import "ADDeviceBase.h"
+#import "ADTripLogModel.h"
+#import "ADPIDCell.h"
+#import "ADPIDModel.h"
+#import "ADPIDBase.h"
+#import "ADDevicesModel.h"
+#import "ADGeofenceModel.h"
+#import "NSDate+Helper.h"
+#import "BMKNavigation.h"
+
+
+typedef enum {
+    LOCATION_ONCE = 1,
+    LOCATION_LIVE = 2
+}ADLocationType;
+
+enum {
+    enSvCropClip,               // the image size will be equal to orignal image, some part of image may be cliped
+    enSvCropExpand,             // the image size will expand to contain the whole image, remain area will be transparent
+};
+typedef NSInteger SvCropMode;
+
+
+@interface ADLocationViewController : ADMenuBaseViewController <BMKMapViewDelegate, UITableViewDelegate, UITableViewDataSource>
+{
+    IBOutlet BMKMapView *_mapView;
+    
+
+    
+//    ADGaugeView *_sppedGaugeView;      //速度表
+//    ADGaugeView *_oilGaugeView;        //油表
+    
+    ADLocationType _locationType;      //枚举类型    LOCATION_ONCE = 1   LOCATION_LIVE = 2
+    ADTripLogModel *_tripLogModel;     
+//    UIView *_liveArgsView;
+    UITableView *_tableView;
+    
+    ADPIDModel *_pidModel;
+    
+    UILabel *_locationAddressLabel;
+    
+    UILabel *_locationSpeedLabel;
+    
+    UILabel *_locationCoolTempLabel;
+    
+    UILabel *_locationRMPLabel;
+    
+    UILabel *_locationOilLabel;
+    
+    UILabel *_locationBatteryLabel;
+}
+
+@property (nonatomic) ADDevicesModel *devicesModel;
+@end

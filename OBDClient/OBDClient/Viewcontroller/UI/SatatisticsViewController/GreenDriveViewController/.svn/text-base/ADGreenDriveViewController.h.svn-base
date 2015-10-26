@@ -1,0 +1,25 @@
+//
+//  ADGreenDriveViewController.h
+//  OBDClient
+//
+//  Created by hys on 13/12/13.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "ADCountCenterModel.h" 
+#import "ADSingletonUtil.h"
+
+#include "ADDefine.h"
+
+
+@interface ADGreenDriveViewController : UIViewController<ADCountCenterDeleagte>
+
+@property(strong,nonatomic)ADCountCenterModel* countCenterModel;
+
+@property(strong,nonatomic)UIImageView* scoreImgView;
+
+@property(strong,nonatomic)UILabel* scoreLabel;
+
+@property(strong,nonatomic)UILabel* averageLabel;
+@end

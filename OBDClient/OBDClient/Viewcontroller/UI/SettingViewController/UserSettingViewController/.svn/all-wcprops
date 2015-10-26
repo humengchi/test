@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/5192/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController
+END
+ADUserDriveCardSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 158
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserDriveCardSettingViewController.m
+END
+ADUserInfoEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserInfoEditViewController.m
+END
+ADUserSettingViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 151
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserSettingViewController.xib
+END
+ADUserDriverLicenseEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 159
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserDriverLicenseEditViewController.m
+END
+ADUserInfoSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 153
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserInfoSettingViewController.h
+END
+ADUserNicknameEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 154
+/svn/LBS/!svn/ver/4774/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserNicknameEditViewController.h
+END
+ADUserSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserSettingViewController.h
+END
+ADUserInfoSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 153
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserInfoSettingViewController.m
+END
+ADUserNicknameEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 154
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserNicknameEditViewController.m
+END
+ADUserDriveCardSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 158
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserDriveCardSettingViewController.h
+END
+ADUserInfoEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserInfoEditViewController.h
+END
+ADUserSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 149
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserSettingViewController.m
+END
+ADUserDriverLicenseEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 159
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/UserSettingViewController/ADUserDriverLicenseEditViewController.h
+END

@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/LBS/!svn/ver/4978/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login
+END
+ADUserRegisterModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserRegisterModel.h
+END
+ADUserDetailModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserDetailModel.m
+END
+ADUserBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserBase.h
+END
+ADUserRegisterModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/LBS/!svn/ver/4978/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserRegisterModel.m
+END
+ADUserBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserBase.m
+END
+ADUserDetailModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Login/ADUserDetailModel.h
+END

@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController
+END
+ADiPhoneLocationViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADiPhoneLocationViewController.xib
+END
+ADLocationViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADLocationViewController.h
+END
+ADMoreInfoViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoViewController.xib
+END
+ADMoreInfoCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/LBS/!svn/ver/5052/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoCell.xib
+END
+ADiPhoneLocationViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADiPhoneLocationViewController.h
+END
+ADLocationViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADLocationViewController.m
+END
+ADPIDCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADPIDCell.h
+END
+ADMoreInfoViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoViewController.h
+END
+ADMoreInfoCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/5052/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoCell.h
+END
+ADiPhoneLocationViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADiPhoneLocationViewController.m
+END
+ADPIDCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADPIDCell.m
+END
+ADMoreInfoViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoViewController.m
+END
+ADMoreInfoCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/LocationViewController/ADMoreInfoCell.m
+END

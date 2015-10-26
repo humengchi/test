@@ -1,0 +1,761 @@
+//
+//  ADLocationViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADLocationViewController.h"
+#import "ADMoreInfoViewController.h"
+#import "NSDate+Helper.h"
+#import "ADSharedModel.h"
+
+#define TAG_ADDRESS_LABEL       30001
+#define TAG_LIVE_TRACE_UIVIEW   30002
+#define TAG_SPEED_LABEL         30003
+#define TAG_COOLTEMP_LABEL      30004
+#define TAG_RMP_LABEL           30005
+#define TAG_OIL_LABEL           30006
+#define TAG_BATTERY_LABEL       30007
+#define TAG_SPEED_AND_VIEW      30008
+#define TAG_ADDRESS_VIEW        30009
+
+@interface ADLocationViewController ()<UIActionSheetDelegate>
+{
+    BOOL trafficOn;
+    BOOL showGeofence;
+    UIButton *trafficButton;
+    UIButton *phonePosButton;
+    UIButton *carPosButton;
+    UIButton *geofenceButton;
+    UIButton *showSpeedButton;
+    NSDate *updateTime;
+    NSString *strUpdateTime;
+    ADGeofenceModel *_geofenceModel;
+    ADSharedModel *_sharedModel;
+    CLLocationCoordinate2D realCoor;
+}
+@end
+
+@implementation ADLocationViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _devicesModel = [[ADDevicesModel alloc]init];
+        [_devicesModel addObserver:self
+                        forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        _geofenceModel = [[ADGeofenceModel alloc] init];
+        [_geofenceModel addObserver:self
+                         forKeyPath:KVO_GEOGENCE_ALL_PATH_NAME
+                            options:NSKeyValueObservingOptionNew
+                            context:NULL];
+        _sharedModel = [[ADSharedModel alloc]init];
+        
+        NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceSuccess:)
+                           name:ADDevicesModelRequestDeviceDetailSuccessNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceFail:)
+                           name:ADDevicesModelRequestDeviceDetailFailNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestDetailDeviceTimeout:)
+                           name:ADDevicesModelRequestDeviceDetailTimeoutNotification
+                         object:nil];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(requestGeogencesSuccess:)
+                           name:ADGeofenceModelRequestSuccessNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestGeogencesFail:)
+                           name:ADGeofenceModelRequestFailNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestGeogencesTiemout:)
+                           name:ADGeofenceModelRequestTimeoutNotification
+                         object:nil];
+    }
+    return self;
+}
+
+
+- (void)dealloc
+{
+    [_devicesModel removeObserver:self
+                       forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME];
+    [_geofenceModel removeObserver:self
+                        forKeyPath:KVO_GEOGENCE_ALL_PATH_NAME];
+    NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailSuccessNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailFailNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADDevicesModelRequestDeviceDetailTimeoutNotification
+                        object:nil];
+    if (_mapView) {
+        _mapView = nil;
+    }
+    [_devicesModel cancel];
+    [_geofenceModel cancel];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [_mapView viewWillAppear];
+    _mapView.delegate=self;
+    [_mapView setShowsUserLocation:NO];
+    [_mapView setZoomLevel:17];
+    [self beginRequestAllGeofencesWithDeviceID:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+//    if(_devicesModel.deviceDetail!=nil){
+//        [self updateMap];
+//    }else{
+//        [_mapView setCenterCoordinate:CLLocationCoordinate2DMake(31.2105889593161, 121.492910330211)];
+//        [_mapView setZoomLevel:12];
+//    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    trafficOn=NO;
+    [_mapView setMapType:BMKMapTypeStandard];
+    _mapView.showsUserLocation = NO;//显示定位图层
+    [_mapView viewWillDisappear];
+    _mapView.delegate = nil; // 不用时，置nil
+    
+}
+
+
+- (IBAction)geofenceTap:(id)sender
+{
+    [_devicesModel cancel];
+    UIViewController *viewController = [[ADiPhoneGeofenceViewController alloc] initWithNibName:nil bundle:nil deviceBase:[ADSingletonUtil sharedInstance].currentDeviceBase];
+    [self.navigationController pushViewController:viewController animated:YES];
+}
+
+- (IBAction)moreTap:(id)sender{
+    [_devicesModel cancel];
+    ADMoreInfoViewController *moreView=[[ADMoreInfoViewController alloc]init];
+    
+    [self.navigationController pushViewController:moreView animated:YES];
+}
+
+- (IBAction)shareToWXTap:(id)sender
+{
+    UIActionSheet * actionSheet = [[UIActionSheet alloc]initWithTitle:@"选择微信分享方式" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"分享给微信好友" otherButtonTitles:@"分享到朋友圈", nil];
+    actionSheet.delegate=self;
+    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [actionSheet showInView:self.view];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+    NSString *url=[NSString stringWithFormat:@"http:180.166.124.142:9983/obd_wx/location.php?licenseNumber=%@&center=%f,%f&zoom=12&address=%@&updateTime=%@&speed=%f&high_temp=%@&engineRPM=%@&fuel_level_now=%f&batt_level=%f",[ADSingletonUtil sharedInstance].currentDeviceBase.licenseNumber,realCoor.longitude,realCoor.latitude,_devicesModel.deviceDetail.address_num,strUpdateTime ==NULL?@"--":strUpdateTime,_devicesModel.deviceDetail.speed,_devicesModel.deviceDetail.high_temp,_devicesModel.deviceDetail.engineRPM,_devicesModel.deviceDetail.fuel_level_now,_devicesModel.deviceDetail.batt_level];
+    NSLog(@"%@",url);
+    
+    switch (buttonIndex) {
+        case 0:
+            [_sharedModel changeScene:0];
+            [_sharedModel sendLinkContentWithTitle:@"我的车辆位置" description:_locationAddressLabel.text image:@"" url:url];
+            break;
+        case 1:
+            [_sharedModel changeScene:1];
+            [_sharedModel sendLinkContentWithTitle:@"我的车辆位置" description:_locationAddressLabel.text image:@"" url:url];
+            break;
+        default:
+            break;
+    }
+    
+}
+
+- (IBAction)showvehicleLocation:(id)sender{
+//    BMKPointAnnotation *annotation = [[BMKPointAnnotation alloc] init];
+//    CLLocationCoordinate2D coor;
+//    coor.latitude = self.devicesModel.deviceDetail.latitude;
+//    coor.longitude = self.devicesModel.deviceDetail.longitude;
+//    NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+//    //纠偏
+//    CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+//    annotation.coordinate = coordinate;
+//    [_mapView setZoomLevel:16];
+//    [_mapView setCenterCoordinate:coordinate animated:YES];
+    
+    if(_mapView.annotations.count>0){
+        BMKPointAnnotation *annotation=_mapView.annotations[0];
+        [_mapView setCenterCoordinate:annotation.coordinate animated:YES];
+    }
+    
+}
+
+- (IBAction)showGeofences:(id)sender{
+//    UIView *speedAndView = (UIView *)[self.view viewWithTag:TAG_SPEED_AND_VIEW];
+//    [self hidden:speedAndView enable:showGeofence];
+    if (showGeofence) {
+        [geofenceButton setBackgroundImage:[UIImage imageNamed:@"geofence_off.png"] forState:UIControlStateNormal];
+        [_mapView removeOverlays:[_mapView.overlays copy]];
+        //remove
+    }else{
+        [geofenceButton setBackgroundImage:[UIImage imageNamed:@"gefence_on.png"] forState:UIControlStateNormal];
+        for(int i=0;i<_geofenceModel.geogences.count;i++){
+            ADGeofenceBase *gefence=[_geofenceModel.geogences objectAtIndex:i];
+            if (![gefence.cmdType isEqualToString:@"0"]) {
+                [self addGeofenceToMap:gefence];
+            }
+        }
+        //add
+    }
+    showGeofence=showGeofence?NO:YES;
+    
+}
+
+-(void)showSpeedView:(id)sender{
+    UIView *speedAndView = (UIView *)[self.view viewWithTag:TAG_SPEED_AND_VIEW];
+    [self hidden:speedAndView enable:!speedAndView.hidden];
+//    UIView *addressView = (UIView *)[self.view viewWithTag:TAG_ADDRESS_VIEW];
+//    [self hidden:addressView enable:!addressView.hidden];
+    if (speedAndView.hidden) {
+        [showSpeedButton setBackgroundImage:[UIImage imageNamed:@"btn_day_press.png"] forState:UIControlStateNormal];
+    }else{
+        [showSpeedButton setBackgroundImage:[UIImage imageNamed:@"btn_day_normal.png"] forState:UIControlStateNormal];
+    }
+}
+
+-(IBAction)showPhoneLocation:(id)sender{
+    if(_mapView.showsUserLocation){
+        _mapView.showsUserLocation = NO;
+        [phonePosButton setBackgroundImage:[UIImage imageNamed:@"phone_position.png"] forState:UIControlStateNormal];
+        
+    }else{
+        _mapView.showsUserLocation = YES;
+        [phonePosButton setBackgroundImage:[UIImage imageNamed:@"phone_position_on.png"] forState:UIControlStateNormal];
+    }
+    
+    //显示定位图层
+}
+
+- (void)mapView:(BMKMapView *)mapView didUpdateUserLocation:(BMKUserLocation *)userLocation{
+    CLLocationCoordinate2D coor;
+    coor.latitude                   = _mapView.userLocation.coordinate.latitude;
+    coor.longitude                  = _mapView.userLocation.coordinate.longitude;
+    [_mapView setCenterCoordinate:coor animated:YES];
+}
+
+- (IBAction)showTraffic:(id)sender{
+    if(trafficOn){
+        trafficOn=NO;
+        [trafficButton setBackgroundImage:[UIImage imageNamed:@"traffic_off.png"] forState:UIControlStateNormal];
+        [_mapView setMapType:BMKMapTypeStandard];
+    }else{
+        trafficOn=YES;
+        [trafficButton setBackgroundImage:[UIImage imageNamed:@"traffic_on.png"] forState:UIControlStateNormal];
+        [_mapView setMapType:BMKMapTypeTrafficOn];
+    }
+}
+
+// Override
+- (BMKOverlayView *)mapView:(BMKMapView *)mapView viewForOverlay:(id <BMKOverlay>)overlay{
+    if ([overlay isKindOfClass:[BMKCircle class]]){
+        BMKCircleView* circleView = [[BMKCircleView alloc] initWithOverlay:overlay];
+        circleView.fillColor = [[UIColor cyanColor] colorWithAlphaComponent:0.3];
+        circleView.strokeColor = [[UIColor blueColor] colorWithAlphaComponent:0.5];
+        circleView.lineWidth = 4.0;
+        return circleView;
+    }
+    return nil;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+//    self.title=NSLocalizedStringFromTable(@"locationKey",@"MyString", @"");
+    trafficOn = NO;
+    showGeofence = YES;
+    UIBarButtonItem *barButton=[[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"geofenceKey",@"MyString", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(geofenceTap:)];
+
+    
+    UIBarButtonItem *barButton2=[[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"detailedKey",@"MyString", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(moreTap:)];
+    
+    UIBarButtonItem *barButtomWX=[[UIBarButtonItem alloc]initWithTitle:@"微信分享" style:UIBarButtonItemStyleBordered target:self action:@selector(shareToWXTap:)];
+    
+    UIBarButtonItem *superButtonItem = self.navigationItem.rightBarButtonItem;
+    
+    [self.navigationItem setRightBarButtonItems:[NSArray arrayWithObjects:barButtomWX,barButton2, barButton,superButtonItem, nil]];
+    
+    if (IOS7_OR_LATER) {
+        barButton.tintColor=[UIColor lightGrayColor];
+        barButton2.tintColor=[UIColor lightGrayColor];
+        barButtomWX.tintColor=[UIColor lightGrayColor];
+        superButtonItem.tintColor=[UIColor lightGrayColor];
+    }
+    
+    //map:
+    _mapView = [[BMKMapView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, self.view.bounds.size.height-44)];
+//    _mapView.delegate = self;
+    [self.view addSubview:_mapView];
+    
+    trafficButton = [[UIButton alloc]init];
+    [trafficButton addTarget:self action:@selector(showTraffic:) forControlEvents:UIControlEventTouchUpInside];
+    trafficButton.titleLabel.text = @"实时路况";
+    trafficButton.frame = CGRectMake(260, 60, 33, 33);
+    [trafficButton setBackgroundImage:[UIImage imageNamed:@"traffic_off.png"] forState:UIControlStateNormal];
+    [self.view addSubview:trafficButton];
+    
+    phonePosButton = [[UIButton alloc]init];
+    [phonePosButton addTarget:self action:@selector(showPhoneLocation:) forControlEvents:UIControlEventTouchUpInside];
+    phonePosButton.titleLabel.text = @"手机位置";
+    phonePosButton.frame = CGRectMake(263, 95, 28, 30);
+    [phonePosButton setBackgroundImage:[UIImage imageNamed:@"phone_position.png"] forState:UIControlStateNormal];
+    [self.view addSubview:phonePosButton];
+    
+    carPosButton = [[UIButton alloc]init];
+    [carPosButton addTarget:self action:@selector(showvehicleLocation:) forControlEvents:UIControlEventTouchUpInside];
+    carPosButton.titleLabel.text = @"车辆位置";
+    carPosButton.frame = CGRectMake(263, 125, 28, 30);
+    [carPosButton setBackgroundImage:[UIImage imageNamed:@"car_position.png"] forState:UIControlStateNormal];
+    [self.view addSubview:carPosButton];
+    
+    geofenceButton = [[UIButton alloc]init];
+    [geofenceButton addTarget:self action:@selector(showGeofences:) forControlEvents:UIControlEventTouchUpInside];
+    geofenceButton.tag=10001;
+    geofenceButton.frame = CGRectMake(263, 155, 28, 30);
+    [geofenceButton setBackgroundImage:[UIImage imageNamed:@"gefence_on.png"] forState:UIControlStateNormal];
+    [self.view addSubview:geofenceButton];
+    
+    showSpeedButton =[[UIButton alloc]init];
+    [showSpeedButton addTarget:self action:@selector(showSpeedView:) forControlEvents:UIControlEventTouchUpInside];
+    showSpeedButton.tag=10002;
+    showSpeedButton.frame = CGRectMake(263, 185, 28, 30);
+    [showSpeedButton setBackgroundImage:[UIImage imageNamed:@"btn_day_normal.png"] forState:UIControlStateNormal];
+    [self.view addSubview:showSpeedButton];
+    
+    UIView *addressView = [[UIView alloc]initWithFrame:CGRectMake(0, 342, 320, 74)];
+    _locationAddressLabel = [[UILabel alloc]initWithFrame:CGRectMake(10, 5, 320, 74)];
+    _locationAddressLabel.backgroundColor=[UIColor clearColor];
+    _locationAddressLabel.textColor=[UIColor darkGrayColor];
+    _locationAddressLabel.font=[UIFont boldSystemFontOfSize:14];
+    _locationAddressLabel.numberOfLines=2;
+    _locationAddressLabel.text=@"";
+    addressView.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"map_location.png"]];
+    addressView.tag=TAG_ADDRESS_VIEW;
+    [addressView addSubview:_locationAddressLabel];
+    [self.view addSubview:addressView];
+    addressView.hidden=NO;
+
+    
+    
+    UIView *speedAndView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 50)];
+    speedAndView.tag = TAG_SPEED_AND_VIEW;
+    UIImageView* bgImgView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 50)];
+    bgImgView.image=[UIImage imageNamed:@"location_speed.png"];
+    [speedAndView addSubview:bgImgView];
+
+    _locationSpeedLabel=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, 64, 50)];  //speed的label
+    _locationSpeedLabel.backgroundColor=[UIColor clearColor];
+    _locationSpeedLabel.textColor=[UIColor darkGrayColor];
+    _locationSpeedLabel.font=[UIFont boldSystemFontOfSize:12];
+    _locationSpeedLabel.textAlignment=UITextAlignmentCenter;
+    _locationSpeedLabel.tag = TAG_SPEED_LABEL;
+    _locationSpeedLabel.text=[NSString stringWithFormat:@"%@:0KM/H",NSLocalizedStringFromTable(@"speedKey",@"MyString", @"")];
+    _locationSpeedLabel.numberOfLines=0;
+    _locationSpeedLabel.lineBreakMode=UILineBreakModeWordWrap;
+    [speedAndView addSubview:_locationSpeedLabel];
+    
+    
+    _locationCoolTempLabel=[[UILabel alloc]initWithFrame:CGRectMake(64, 0, 64, 50)];  //speed的label
+    _locationCoolTempLabel.backgroundColor=[UIColor clearColor];
+    _locationCoolTempLabel.textColor=[UIColor darkGrayColor];
+    _locationCoolTempLabel.font=[UIFont boldSystemFontOfSize:12];
+    _locationCoolTempLabel.textAlignment=UITextAlignmentCenter;
+    _locationCoolTempLabel.tag = TAG_COOLTEMP_LABEL;
+    _locationCoolTempLabel.text=[NSString stringWithFormat:@"%@:\n0℃",NSLocalizedStringFromTable(@"coolKey",@"MyString", @"")];
+    _locationCoolTempLabel.numberOfLines=0;
+    _locationCoolTempLabel.lineBreakMode=UILineBreakModeWordWrap;
+    [speedAndView addSubview:_locationCoolTempLabel];
+    
+    _locationRMPLabel=[[UILabel alloc]initWithFrame:CGRectMake(128, 0, 64, 50)];  //speed的label
+    _locationRMPLabel.backgroundColor=[UIColor clearColor];
+    _locationRMPLabel.textColor=[UIColor darkGrayColor];
+    _locationRMPLabel.font=[UIFont boldSystemFontOfSize:12];
+    _locationRMPLabel.textAlignment=UITextAlignmentCenter;
+    _locationRMPLabel.tag = TAG_RMP_LABEL;
+    _locationRMPLabel.text=[NSString stringWithFormat:@"%@:0r/min",NSLocalizedStringFromTable(@"enginePRM",@"MyString", @"")];
+    _locationRMPLabel.numberOfLines=0;
+    _locationRMPLabel.lineBreakMode=UILineBreakModeWordWrap;
+
+    [speedAndView addSubview:_locationRMPLabel];
+
+    _locationOilLabel=[[UILabel alloc]initWithFrame:CGRectMake(192, 0, 64, 50)]; //oil的label
+    _locationOilLabel.backgroundColor=[UIColor clearColor];
+    _locationOilLabel.textColor=[UIColor darkGrayColor];
+    _locationOilLabel.font=[UIFont boldSystemFontOfSize:12];
+    _locationOilLabel.textAlignment=UITextAlignmentCenter;
+    _locationOilLabel.tag = TAG_OIL_LABEL;
+    _locationOilLabel.text=[NSString stringWithFormat:@"%@:\n0%%",NSLocalizedStringFromTable(@"oilKey",@"MyString", @"")];
+    _locationOilLabel.numberOfLines=0;
+    _locationOilLabel.lineBreakMode=UILineBreakModeWordWrap;
+    [speedAndView addSubview:_locationOilLabel];
+    
+    _locationBatteryLabel=[[UILabel alloc]initWithFrame:CGRectMake(256, 0, 64, 50)]; //oil的label
+    _locationBatteryLabel.backgroundColor=[UIColor clearColor];
+    _locationBatteryLabel.textColor=[UIColor darkGrayColor];
+    _locationBatteryLabel.font=[UIFont boldSystemFontOfSize:12];
+    _locationBatteryLabel.textAlignment=UITextAlignmentCenter;
+    _locationBatteryLabel.tag = TAG_BATTERY_LABEL;
+    _locationBatteryLabel.text=[NSString stringWithFormat:@"%@:\n0v",NSLocalizedStringFromTable(@"batteryKey",@"MyString", @"")];
+    _locationBatteryLabel.numberOfLines=0;
+    _locationBatteryLabel.lineBreakMode=UILineBreakModeWordWrap;
+
+    [speedAndView addSubview:_locationBatteryLabel];
+    
+    
+//    speedAndView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"map_location.png"]];
+
+    [self.view addSubview:speedAndView];
+    speedAndView.hidden=NO;
+    
+    if (IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {            //IOS7.0 3.5寸屏幕
+        [_mapView setFrame:CGRectMake(0, 64, 320, 416)];
+        [trafficButton setFrame:CGRectMake(260, 124, 33, 33)];
+        [phonePosButton setFrame:CGRectMake(263, 159, 28, 30)];
+        [carPosButton setFrame:CGRectMake(263, 189, 28, 30)];
+        [geofenceButton setFrame:CGRectMake(263, 219, 28, 30)];
+        [showSpeedButton setFrame:CGRectMake(263, 249, 28, 30)];
+        [addressView setFrame:CGRectMake(0, 406, 320, 74)];
+        [speedAndView setFrame:CGRectMake(0, 64, 320, 50)];
+        UIView* view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
+        [view setBackgroundColor:[UIColor grayColor]];
+        [self.view addSubview:view];
+
+	}
+    if (!IOS7_OR_LATER && DEVICE_IS_IPHONE5) {            //IOS6.0 4.0寸屏幕
+        [addressView setFrame:CGRectMake(0, 430, 320, 74)];
+    }
+    if (IOS7_OR_LATER && DEVICE_IS_IPHONE5) {             //IOS7.0 4.0寸屏幕
+        [_mapView setFrame:CGRectMake(0, 64, 320, 504)];
+        [trafficButton setFrame:CGRectMake(260, 124, 33, 33)];
+        [phonePosButton setFrame:CGRectMake(263, 159, 28, 30)];
+        [carPosButton setFrame:CGRectMake(263, 189, 28, 30)];
+        [geofenceButton setFrame:CGRectMake(263, 219, 28, 30)];
+        [showSpeedButton setFrame:CGRectMake(263, 249, 28, 30)];
+        [addressView setFrame:CGRectMake(0, 494, 320, 74)];
+        [speedAndView setFrame:CGRectMake(0, 64, 320, 50)];
+        UIView* view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 20)];
+        [view setBackgroundColor:[UIColor grayColor]];
+        [self.view addSubview:view];
+	}
+
+    
+    [_devicesModel requestDetailDeviceInfoWithArguments:[NSArray arrayWithObjects:@"",[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID,nil] isContinue:YES];
+}
+
+- (void)beginRequestAllGeofencesWithDeviceID:(NSString *)aDeviceID
+{
+    [_geofenceModel requestGeofencesWithDeviceID:aDeviceID];
+}
+
+-(void)hidden:(UIView*)view enable:(BOOL)enable{
+    CATransition *animation = [CATransition animation];
+    animation.type = kCATransitionFade;
+    animation.duration = 0.8;
+    [view.layer addAnimation:animation forKey:nil];
+    
+    view.hidden = enable;
+}
+
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == _devicesModel) {
+        if ([keyPath isEqualToString:KVO_DEVICE_DETAIL_PATH_NAME]) {
+            if(_devicesModel.deviceDetail==nil){
+                [IVToastHUD showAsToastErrorWithStatus:NSLocalizedStringFromTable(@"code201",@"MyString", @"")];
+                _locationAddressLabel.text=NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+            }else{
+                [self updateMap];
+            }
+            
+            return;
+        }
+    }
+    if (object == _geofenceModel) {
+        if ([keyPath isEqualToString:KVO_GEOGENCE_ALL_PATH_NAME]) {
+            if(_geofenceModel.geogences.count>0){
+                if([_mapView.overlays count]!=0){
+                    [_mapView removeOverlays:[_mapView.overlays copy]];
+                }
+                for(int i=0;i<_geofenceModel.geogences.count;i++){
+                    ADGeofenceBase *gefence=[_geofenceModel.geogences objectAtIndex:i];
+                    if (![gefence.cmdType isEqualToString:@"0"]) {
+                        [self addGeofenceToMap:gefence];
+                    }
+                }
+            }else{
+                
+            }
+            NSLog(@"%d",_geofenceModel.geogences.count);
+            
+            return;
+        }
+    }
+
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+- (void)addGeofenceToMap:(ADGeofenceBase*)aGeofence
+{
+    CLLocationCoordinate2D coor = {aGeofence.lat1, aGeofence.lng1};
+    BMKCircle* circle = [BMKCircle circleWithCenterCoordinate:coor radius:aGeofence.radius];
+    circle.title=@"geofence";
+    [_mapView addOverlay:circle];
+}
+
+- (void)requestDetailDeviceSuccess:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+//    [self beginRequestAllGeofencesWithDeviceID:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+}
+
+- (void)requestDetailDeviceFail:(NSNotification *)aNoti
+{
+//    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+    _locationAddressLabel.text=NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+}
+
+- (void)requestDetailDeviceTimeout:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (void)updateMap
+{
+    if([_mapView.annotations count]!=0){
+        [_mapView removeAnnotations:_mapView.annotations];
+    }
+    
+//    UILabel *labelOfDate = (UILabel*)[self.view viewWithTag:TAG_LABEL_LAST_UPDATED_DATE];
+    NSString *stringTime=_devicesModel.deviceDetail.gpsTime;
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    NSString *stringDate = _devicesModel.deviceDetail.gpsDate;
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSDate *update_time=[[NSString stringWithFormat:@"%@ %@",stringDate,stringTime] dateFromStringHasTime:YES];
+    strUpdateTime=[update_time toStringHasTime:YES];
+    
+    BMKPointAnnotation *annotation = [[BMKPointAnnotation alloc] init];
+    if([self.devicesModel.deviceDetail.ign isEqualToString:@"0"]){
+        annotation.subtitle=@"ign_off";
+    }else{
+        annotation.subtitle=@"ign_on";
+    }
+    CLLocationCoordinate2D coor;
+    coor.latitude = self.devicesModel.deviceDetail.latitude;
+    coor.longitude = self.devicesModel.deviceDetail.longitude;
+<<<<<<< .mine
+    if ([_devicesModel.deviceDetail.ign isEqualToString:@"1"] && [_devicesModel.deviceDetail.onLineStatus isEqualToString:@"1"]) {
+        if (coor.latitude!=0&&coor.longitude!=0) {     //启动 在线 最新位置有效
+            _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+        }else if (coor.latitude==0&&coor.longitude==0){  //启动 在线 最新位置无效
+            if (_devicesModel.deviceDetail.lastLocation==nil) {    //最近位置无效
+                _locationAddressLabel.text = @"您的车辆尚无有效定位记录";
+                coor.latitude=121.506296;
+                coor.longitude=31.245704;
+            }else{    //最新位置有效
+                if([_devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"]==[NSNull null]||[_devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"]==[NSNull null]){
+                    coor.latitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"] floatValue];
+                    coor.longitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"] floatValue];
+                    _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"lastPositionKey",@"MyString", @""),self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+                }
+=======
+    if(coor.latitude==0&&coor.longitude==0){
+        if(self.devicesModel.deviceDetail.lastLocation==nil){
+            _locationAddressLabel.text =NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+            realCoor=coor;
+        }else{
+            NSLog(@"%@",[self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"]);
+            if([self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"]==[NSNull null]||[self.devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"]==[NSNull null]){
+                _locationAddressLabel.text =NSLocalizedStringFromTable(@"noposition",@"MyString", @"");
+                return;
+>>>>>>> .r5231
+            }
+        }
+    }else{
+        if (coor.latitude!=0&&coor.longitude!=0) {
+            _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"lastPositionKey",@"MyString", @""),self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+        }else if (coor.latitude==0&&coor.longitude==0){
+            coor.latitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"] floatValue];
+            coor.longitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"] floatValue];
+            _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"lastPositionKey",@"MyString", @""),self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+        }
+    }
+//    if(coor.latitude==0&&coor.longitude==0){
+//        if(self.devicesModel.deviceDetail.lastLocation==nil){
+//            _locationAddressLabel.text =NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+//        }else{
+//            NSLog(@"%@",[self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"]);
+//            if([self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"]==[NSNull null]||[self.devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"]==[NSNull null]){
+//                _locationAddressLabel.text =NSLocalizedStringFromTable(@"noLocation",@"MyString", @"");
+//                return;
+//            }
+//            coor.latitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"latitude"] floatValue];
+//            coor.longitude = [[self.devicesModel.deviceDetail.lastLocation objectForKey:@"longitude"] floatValue];
+//            _locationAddressLabel.text = NSLocalizedStringFromTable(@"noposition",@"MyString", @"");
+    
+    
+//            _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),
+//                                          [self.devicesModel.deviceDetail.lastLocation objectForKey:@"address_num"],NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+    
+    
+            NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+            //纠偏
+            CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+            annotation.coordinate = coordinate;
+//            if([annotation.subtitle isEqualToString:@"ign_off"]){
+//                // 保持原状
+//            }else{
+//                annotation.subtitle = @"disconn";
+//            }
+            [_mapView addAnnotation:annotation];
+            
+            if(!_mapView.showsUserLocation&&![updateTime isEqualToDate:update_time]){
+                NSLog(@"lastlocation");
+                [_mapView setCenterCoordinate:coordinate animated:YES];
+//                [_mapView setZoomLevel:16];
+            }
+<<<<<<< .mine
+//        }
+//    }else{
+//        NSLog(@"location");
+//        _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),
+//                                      self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strFormatDate];
+    
+//        NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+//        //纠偏
+//        CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+//        annotation.coordinate = coordinate;
+//        [_mapView addAnnotation:annotation];
+//        
+//        if(!_mapView.showsUserLocation&&![updateTime isEqualToDate:update_time]){
+//            
+//            [_mapView setCenterCoordinate:coordinate animated:YES];
+=======
+            realCoor=coordinate;
+        }
+    }else{
+        NSLog(@"location");
+        _locationAddressLabel.text = [NSString stringWithFormat:@"%@：%@\n%@：%@",NSLocalizedStringFromTable(@"currentPositionKey",@"MyString", @""),
+                                      self.devicesModel.deviceDetail.address_num,NSLocalizedStringFromTable(@"latestUpdateTime",@"MyString", @""),strUpdateTime ==NULL?@"--":strUpdateTime];
+        
+        NSDictionary *tip = BMKBaiduCoorForWgs84(coor);
+        //纠偏
+        CLLocationCoordinate2D coordinate = BMKCoorDictionaryDecode(tip);
+        annotation.coordinate = coordinate;
+        [_mapView addAnnotation:annotation];
+        
+        if(!_mapView.showsUserLocation&&![updateTime isEqualToDate:update_time]){
+            
+            [_mapView setCenterCoordinate:coordinate animated:YES];
+>>>>>>> .r5231
+//            [_mapView setZoomLevel:16];
+<<<<<<< .mine
+//        }
+//    }
+=======
+        }
+        realCoor=coordinate;
+    }
+>>>>>>> .r5231
+    updateTime=update_time;
+    
+    UILabel *labelOfSpeed = (UILabel *)[self.view viewWithTag:TAG_SPEED_LABEL];
+    labelOfSpeed.text = [NSString stringWithFormat:@"%@:\n%dKM/H",NSLocalizedStringFromTable(@"speedKey",@"MyString", @""),(int)(self.devicesModel.deviceDetail.speed)];
+    
+    UILabel *labelOfCoolTemp = (UILabel *)[self.view viewWithTag:TAG_COOLTEMP_LABEL];
+    labelOfCoolTemp.text = [NSString stringWithFormat:@"%@:\n%.1f℃",NSLocalizedStringFromTable(@"coolKey",@"MyString", @""),(float)([self.devicesModel.deviceDetail.high_temp floatValue])];
+    
+    UILabel *labelOfRMP = (UILabel *)[self.view viewWithTag:TAG_RMP_LABEL];
+    labelOfRMP.text = [NSString stringWithFormat:@"%@:\n%.0fr/min",NSLocalizedStringFromTable(@"enginePRM",@"MyString", @""),(float)([self.devicesModel.deviceDetail.engineRPM floatValue])];
+
+    UILabel *labelOfOil = (UILabel *)[self.view viewWithTag:TAG_OIL_LABEL];
+    labelOfOil.text = [NSString stringWithFormat:@"%@:\n%d%%",NSLocalizedStringFromTable(@"oilKey",@"MyString", @""),(int)(self.devicesModel.deviceDetail.fuel_level_now)];
+    
+    UILabel *labelOfBattery = (UILabel *)[self.view viewWithTag:TAG_BATTERY_LABEL];
+    labelOfBattery.text = [NSString stringWithFormat:@"%@:\n%.0fv",NSLocalizedStringFromTable(@"batteryKey",@"MyString", @""),(float)(self.devicesModel.deviceDetail.batt_level)];
+}
+
+- (BMKAnnotationView *)mapView:(BMKMapView *)mapView
+             viewForAnnotation:(id<BMKAnnotation>)annotation
+{
+    if ([annotation isKindOfClass:[BMKPointAnnotation class]]) {
+        BMKPinAnnotationView *newAnnotationView = [[BMKPinAnnotationView alloc] initWithAnnotation:annotation
+                                                                                   reuseIdentifier:@"myAnnotation"];
+//        newAnnotationView.pinColor = BMKPinAnnotationColorRed;
+        newAnnotationView.enabled=NO;
+        newAnnotationView.enabled3D=YES;
+        newAnnotationView.animatesDrop = NO;//标注的动画效果.
+//        if ([annotation.subtitle isEqualToString:@"ign_off"]) {
+//            newAnnotationView.image = [UIImage imageNamed:@"grayCar.png"];
+//        }else if ([annotation.subtitle isEqualToString:@"disconn"]){
+//            newAnnotationView.image = [UIImage imageNamed:@"car_disconn.png"];
+//        }
+//        else{
+//            newAnnotationView.image = [UIImage imageNamed:@"car.png"];
+//        }
+        
+        if ([_devicesModel.deviceDetail.ign isEqualToString:@"1"] && [_devicesModel.deviceDetail.onLineStatus isEqualToString:@"1"]) {
+            if (newAnnotationView.annotation.coordinate.latitude!=0 && newAnnotationView.annotation.coordinate.longitude!=0) {
+                newAnnotationView.image=[UIImage imageNamed:@"car.png"];
+            }else{
+                newAnnotationView.image=[UIImage imageNamed:@"car_disconn.png"];
+            }
+        }else{
+            newAnnotationView.image=[UIImage imageNamed:@"grayCar.png"];
+        }
+        return newAnnotationView;
+    }
+    return nil;
+    
+}
+
+- (void)mapView:(BMKMapView *)mapView didSelectAnnotationView:(BMKAnnotationView *)view{
+    UIView *labelOfSpeed = (UIView *)[self.view viewWithTag:11];
+    UIView *labelOfAddress = (UIView *)[self.view viewWithTag:12];
+    [self hidden:labelOfAddress enable:NO];
+    [self hidden:labelOfSpeed enable:NO];
+}
+
+- (void)mapView:(BMKMapView *)mapView didDeselectAnnotationView:(BMKAnnotationView *)view{
+//    UIView *labelOfSpeed = (UIView *)[self.view viewWithTag:11];
+//    UIView *labelOfAddress = (UIView *)[self.view viewWithTag:12];
+//    [self hidden:labelOfAddress enable:YES];
+//    [self hidden:labelOfSpeed enable:YES];
+}
+
+#pragma mark - notification handle
+- (void)requestGeogencesSuccess:(NSNotification *)aNoti
+{
+    //    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestGeogencesFail:(NSNotification *)aNoti
+{
+    //    [_tableView setEditing:NO];
+    //[IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:[[ADSingletonUtil sharedInstance] errorStringByResultCode:[aNoti.userInfo objectForKey:@"resultCode"]]];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestGeogencesTimeout:(NSNotification *)aNoti
+{
+    //    [_tableView setEditing:NO];
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+@end

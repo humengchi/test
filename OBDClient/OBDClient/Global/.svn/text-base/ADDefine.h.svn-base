@@ -1,0 +1,16 @@
+//
+//  ADDefine.h
+//  OBDClient
+//
+//  Created by hys on 20/2/14.
+//  Copyright (c) 2014年 AnyData.com. All rights reserved.
+//
+
+#ifndef OBDClient_ADDefine_h
+#define OBDClient_ADDefine_h
+
+#define IOS7_OR_LATER	( [[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending )
+#define DEVICE_IS_IPHONE5 ([[UIScreen mainScreen] bounds].size.height == 568)
+
+
+#endif

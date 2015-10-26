@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController
+END
+ADVehicleLicenseEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 166
+/svn/LBS/!svn/ver/4707/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseEditViewController.h
+END
+ADVehicleLicenseInfoViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 168
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseInfoViewController.xib
+END
+ADVehicleLicenseEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 166
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseEditViewController.m
+END
+ADVehicleLicenseInfoViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 166
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseInfoViewController.h
+END
+ADVehicleLicenseEditViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 168
+/svn/LBS/!svn/ver/4707/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseEditViewController.xib
+END
+ADVehicleLicenseInfoViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 166
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleLicenseInfoViewController/ADVehicleLicenseInfoViewController.m
+END

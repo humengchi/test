@@ -1,0 +1,226 @@
+//
+//  ADHealthyViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADHealthyViewController.h"
+#import "ADHealthyHistoryViewController.h"
+#import "ADMaintainAddViewController.h"
+
+@interface ADHealthyViewController ()<ADAddMaintainItemsDelegate>
+@property (nonatomic) NSArray *itemData;
+@property (nonatomic) NSArray *itemTimeData;
+@property (nonatomic) UITableView * tableView;
+@end
+
+@implementation ADHealthyViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _maintainModel=[[ADMaintainModel alloc]init];
+        [_maintainModel addObserver:self
+                        forKeyPath:KVO_MAINTAIN_LIST_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+        [notiCenter addObserver:self
+                       selector:@selector(requestNextItemsFail:)
+                           name:ADMaintainModelRequestNextMaintainItemsFailNotification
+                         object:nil];
+        
+    }
+    return self;
+}
+
+-(void)dealloc{
+    [_maintainModel removeObserver:self forKeyPath:KVO_MAINTAIN_LIST_PATH_NAME];
+    NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+    [notiCenter removeObserver:self
+                          name:ADMaintainModelRequestNextMaintainItemsFailNotification
+                        object:nil];
+    [_maintainModel cancel];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    UIButton *addButton =[UIButton buttonWithType:UIButtonTypeRoundedRect];
+    addButton.frame = CGRectMake(10, 362, WIDTH-20, 44);
+    [addButton setTitle:@"新增保养" forState:UIControlStateNormal];
+    [addButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+    [addButton addTarget:self action:@selector(addTap1:) forControlEvents:UIControlEventTouchUpInside];
+    [addButton setBackgroundImage:[UIImage imageNamed:@"_0001_Shape-8.png"] forState:UIControlStateNormal];
+    [self.view addSubview:addButton];
+    addButton.tag=1001;
+//    addButton.hidden=YES;
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    
+    if (!IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {
+        self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-64) style:UITableViewStyleGrouped];
+    }
+    if (IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {            //IOS7.0 3.5寸屏幕
+        self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 64, WIDTH, HEIGHT-128) style:UITableViewStylePlain];
+        [addButton setFrame:CGRectMake(10, HEIGHT-54, WIDTH-20, 44)];
+	}
+    if (!IOS7_OR_LATER && DEVICE_IS_IPHONE5) {            //IOS6.0 4.0寸屏幕
+        self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, WIDTH, HEIGHT-64) style:UITableViewStyleGrouped];
+        [addButton setFrame:CGRectMake(10, HEIGHT-54, WIDTH-20, 44)];
+    }
+    if (IOS7_OR_LATER && DEVICE_IS_IPHONE5) {             //IOS7.0 4.0寸屏幕
+         self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 64, WIDTH, HEIGHT-216) style:UITableViewStylePlain];
+        [addButton setFrame:CGRectMake(10, HEIGHT-54, WIDTH-20, 44)];
+	}
+
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.backgroundView=nil;
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    self.tableView.frame = CGRectMake(0, 64, WIDTH, HEIGHT-250);
+    [self.view addSubview:_tableView];
+    
+//    UIBarButtonItem *addButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addTap:)];
+    
+    UIBarButtonItem *barButton=[[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"historyKey",@"MyString", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(showHistory)];
+    
+    UIBarButtonItem *barPlanButton=[[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"planKey",@"MyString", @"") style:UIBarButtonItemStyleBordered target:self action:@selector(showMaintainPlan)];
+    
+	self.navigationItem.rightBarButtonItems=[NSArray arrayWithObjects:barPlanButton,barButton, nil];
+    if (IOS7_OR_LATER) {
+        barButton.tintColor=[UIColor lightGrayColor];
+        barPlanButton.tintColor=[UIColor lightGrayColor];
+    }
+    
+    
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+    [_maintainModel requestVehicleMaintainListWithArguments:[NSArray arrayWithObjects:[ADSingletonUtil sharedInstance].currentDeviceBase.d_vin,@"0", nil]];
+    
+}
+
+- (void)requestNextItemsFail:(NSNotification *)aNoti{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:NSLocalizedStringFromTable(@"getMaintainItemsFailKey",@"MyString", @"")];
+    self.navigationItem.rightBarButtonItems=nil;
+}
+
+- (IBAction)addTap1:(id)sender {
+    ADMaintainAddViewController *addView=[[ADMaintainAddViewController alloc]initWithNibName:nil bundle:nil];
+    addView.delegate=self;
+    [self.navigationController pushViewController:addView animated:YES];
+    
+}
+
+- (void) editContactViewController:(ADMaintainAddViewController *) vehicleMaintainItemsAddViewController{
+    [self updateUI];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    self.title=NSLocalizedStringFromTable(@"MaintenancereminderKey",@"MyString", @"");
+    
+}
+
+- (void)showHistory{
+    
+    ADHealthyHistoryViewController *healthyHistoryView=[[ADHealthyHistoryViewController alloc]init];
+    [self.navigationController pushViewController:healthyHistoryView animated:YES];
+}
+
+-(void)showMaintainPlan{
+    ADMaintainPlanViewController* maintainPlan=[[ADMaintainPlanViewController alloc]init];
+    [self.navigationController pushViewController:maintainPlan animated:YES];
+    
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    
+    if (object == _maintainModel) {
+        if ([keyPath isEqualToString:KVO_MAINTAIN_LIST_PATH_NAME]) {
+            [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+            _itemData=_maintainModel.vehicleMaintainList;
+            [_tableView reloadData];
+            UIButton *button=(UIButton*)[self.view viewWithTag:1001];
+            button.hidden=NO;
+            return;
+        }
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+#pragma mark - Table view data source
+// 有几个区
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+//- (NSString*)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
+//    return @"即将进行的保养计划";
+//}
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 40;
+}
+
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+    UIView* customView=[[UIView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, 40)];
+    [customView setBackgroundColor:[UIColor clearColor]];
+    UILabel* headlabel=[[UILabel alloc]initWithFrame:CGRectMake(15, 5, WIDTH-30, 30)];
+    [headlabel setBackgroundColor:[UIColor clearColor]];
+    headlabel.text=@"即将进行的保养计划";
+    headlabel.textColor=[UIColor lightGrayColor];
+    [customView addSubview:headlabel];
+    return customView;
+}
+//每个区里有几行
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return _itemData.count;
+}
+//某区某行显示什么
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+    }
+    NSDictionary *data=_itemData[indexPath.row];
+    
+    cell.detailTextLabel.text=[NSString stringWithFormat:@"%@%@",[data objectForKey:@"NextMaintainMelileage"],NSLocalizedStringFromTable(@"kmKey",@"MyString", @"")];
+    cell.textLabel.text = [data objectForKey:@"Name"];
+    cell.backgroundColor=[UIColor whiteColor];
+//    cell.accessoryType=UITableViewCellAccessoryDetailDisclosureButton;
+
+    // Configure the cell...
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+//    UITableViewCell *selectedCell=[tableView cellForRowAtIndexPath:indexPath];
+//    if (selectedCell.accessoryType==UITableViewCellAccessoryNone) {
+//        selectedCell.accessoryType=UITableViewCellAccessoryCheckmark;
+//    }else{
+//        selectedCell.accessoryType=UITableViewCellAccessoryNone;
+//    }
+    
+}
+
+- (void)updateUI{
+    [_maintainModel requestVehicleMaintainListWithArguments:[NSArray arrayWithObjects:[ADSingletonUtil sharedInstance].currentDeviceBase.d_vin,@"0", nil]];
+}
+
+@end

@@ -1,0 +1,168 @@
+//
+//  ADSettingViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADSettingViewController.h"
+#import "ADSettingItemViewController.h"
+#import "ADMessageSettingViewController.h"
+#import "ADUserLocationSettingViewController.h"
+#import "ADUserSettingViewController.h"
+#import "ADCarManagerItemViewController.h"
+#import "ADFeedBackViewController.h"
+
+@interface ADSettingViewController ()
+@property (nonatomic) NSArray *itemData;
+@property (nonatomic) UITableView * tableView;
+@end
+
+@implementation ADSettingViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    _itemData=@[
+//                NSLocalizedStringFromTable(@"interfaceSettingKey",@"MyString", @""),
+//                NSLocalizedStringFromTable(@"messageSettingKey",@"MyString", @""),
+                NSLocalizedStringFromTable(@"userSettingKey",@"MyString", @""),
+//                NSLocalizedStringFromTable(@"citySettingKey",@"MyString", @""),
+                NSLocalizedStringFromTable(@"feedbackKey",@"MyString", @""),
+                NSLocalizedStringFromTable(@"helpKey",@"MyString", @""),
+                NSLocalizedStringFromTable(@"aboutKey",@"MyString", @"")
+                ];
+    
+    self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    self.tableView.backgroundColor = [UIColor clearColor];
+    self.tableView.backgroundView=nil;
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    _tableView.separatorColor = [UIColor clearColor];
+    [self.view addSubview:_tableView];
+	// Do any additional setup after loading the view.
+    if (IOS7_OR_LATER) {
+        CGRect frame=self.tableView.frame;
+        frame.origin.y+=64;
+        frame.size.width = WIDTH;
+        [self.tableView setFrame:frame];
+		[self setExtraCellLineHidden:self.tableView];
+    }
+
+}
+
+-(void)setExtraCellLineHidden: (UITableView *)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+// 有几个区
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+//每个区里有几行
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return _itemData.count;
+}
+//某区某行显示什么
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    }
+    UIColor *labelColor = COLOR_RGB(255, 255, 255);
+    cell.textLabel.textColor = labelColor;
+    cell.textLabel.font=[UIFont systemFontOfSize:16];
+    cell.textLabel.text = _itemData[indexPath.row];
+    cell.backgroundColor=[UIColor clearColor];
+    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    
+    cell.selectionStyle=UITableViewCellSelectionStyleGray;
+    
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,40, WIDTH, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [cell addSubview:lineView];
+    
+    UIButton *buttonRight = [UIButton buttonWithType:UIButtonTypeCustom];
+    buttonRight.frame = CGRectMake(0, 10, 6, 6.5);
+    [buttonRight setBackgroundImage:[UIImage imageNamed:@"vehicle_list_right.png"] forState:UIControlStateNormal];
+    cell.accessoryView=buttonRight;
+    
+    
+    // Configure the cell...
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 41;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView indentationLevelForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 1;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    self.title=NSLocalizedStringFromTable(@"settingKey",@"MyString", @"");
+}
+
+- (void)tableView:(UITableView *)tableView
+didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+//    if (indexPath.row==0) {
+//        ADMessageSettingViewController *settingItemView=[[ADMessageSettingViewController alloc]init];
+////        settingItemView.settingItemTitle=_itemData[indexPath.row];
+//        [self.navigationController pushViewController:settingItemView animated:YES];
+//
+//    }else
+    if (indexPath.row==0){
+        ADUserSettingViewController *userSettingView=[[ADUserSettingViewController alloc]init];
+        [self.navigationController pushViewController:userSettingView animated:YES];
+    }else if (indexPath.row==1){
+        ADFeedBackViewController *feedBackView = [[ADFeedBackViewController alloc]init];
+        [self.navigationController pushViewController:feedBackView animated:YES];
+    }
+//    else if (indexPath.row==3){
+//        ADUserLocationSettingViewController *citySettingView=[[ADUserLocationSettingViewController alloc]init];
+//        [self.navigationController pushViewController:citySettingView animated:YES];
+//    }
+    
+    else if (indexPath.row==3){
+        ADAboutViewController* about=[[ADAboutViewController alloc]initWithNibName:@"ADAboutViewController" bundle:nil];
+        [self.navigationController pushViewController:about animated:YES];
+    }else{
+        ADCarManagerItemViewController *carManagerView = [[ADCarManagerItemViewController alloc] init];
+        [self.navigationController pushViewController:carManagerView animated:YES];
+    }
+    
+    
+}
+
+@end

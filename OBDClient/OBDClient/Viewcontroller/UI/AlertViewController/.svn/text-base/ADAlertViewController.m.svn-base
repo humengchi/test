@@ -1,0 +1,334 @@
+//
+//  ADAlertViewController.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-2.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADAlertViewController.h"
+#import "NSDate+Helper.h"
+
+#define TAG_LABEL_TYPE      96300
+#define TAG_LABEL_DATE      96301
+#define TAG_LABEL_PLACE     96302
+#define TAG_LABEL_DETAIL    96303
+
+@interface ADAlertViewController ()
+
+@end
+
+@implementation ADAlertViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil
+               bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil
+                           bundle:nibBundleOrNil];
+    if (self) {
+        _historyModel = [[ADHistoryModel alloc] init];
+        _devicesModel = [[ADDevicesModel alloc]init];
+        
+        [_devicesModel addObserver:self
+                        forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        
+        [_historyModel addObserver:self
+                        forKeyPath:KVO_ALERT_PATH_NAME
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+        
+        NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+        [notiCenter addObserver:self
+                       selector:@selector(requestAlsersSuccess:)
+                           name:ADHistoryModelRequestAlertsSuccessNotification
+                         object:nil];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(requestAlsersFail:)
+                           name:ADHistoryModelRequestAlertsFailNotification
+                         object:nil];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(requestAlsersTimeout:)
+                           name:ADHistoryModelRequestAlertsTimeoutNotification
+                         object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(LoginTimeOut)
+                                                     name:ADHistoryModelLoginTimeOutNotification
+                                                   object:nil];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    
+    [_devicesModel removeObserver:self forKeyPath:KVO_DEVICE_DETAIL_PATH_NAME];
+    
+    [_historyModel removeObserver:self forKeyPath:KVO_ALERT_PATH_NAME];
+    NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+    [notiCenter removeObserver:self
+                          name:ADHistoryModelRequestAlertsSuccessNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADHistoryModelRequestAlertsFailNotification
+                        object:nil];
+    [notiCenter removeObserver:self
+                          name:ADHistoryModelRequestAlertsTimeoutNotification
+                        object:nil];
+    [_historyModel cancel];
+    [_devicesModel cancel];
+}
+
+- (void)infoTap:(UIGestureRecognizer *)ges
+{
+    [self infoViewDisplayOrNot:NO];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.title=NSLocalizedStringFromTable(@"alarmsListKey",@"MyString", @"");
+    self.navigationItem.leftBarButtonItem=nil;
+    _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 416) style:UITableViewStylePlain];
+    _tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    _tableView.backgroundColor = [UIColor clearColor];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:_tableView];
+    
+    _infoView = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 150, 320, 150)];
+    _infoView.backgroundColor = [UIColor lightGrayColor];
+    _infoView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    [_infoView setHidden:YES];
+    UITapGestureRecognizer *tapGes = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(infoTap:)];
+    tapGes.numberOfTapsRequired = 1;
+    [_infoView addGestureRecognizer:tapGes];
+//    UILabel *labelOfType = [[UILabel alloc] initWithFrame:CGRectMake(10, 2, 300, 20)];
+//    labelOfType.tag = TAG_LABEL_TYPE;
+//    labelOfType.backgroundColor = [UIColor clearColor];
+//    labelOfType.font=[UIFont systemFontOfSize:14];
+//    labelOfType.text = [NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"alarmTypeKey",@"MyString", @""),NSLocalizedStringFromTable(@"bootKey",@"MyString", @"")];
+//    [_infoView addSubview:labelOfType];
+    
+//    UILabel *labelOfDate = [[UILabel alloc] initWithFrame:CGRectMake(10, 20, 300, 20)];
+//    labelOfDate.tag = TAG_LABEL_DATE;
+//    labelOfDate.backgroundColor = [UIColor clearColor];
+//    labelOfDate.font=[UIFont systemFontOfSize:14];
+//    labelOfDate.text = [NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"alarmTimeKey",@"MyString", @""),@"2013-05-28"];
+//    [_infoView addSubview:labelOfDate];
+    
+    UILabel *labelOfPlace = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 300, 35)];
+    labelOfPlace.tag = TAG_LABEL_PLACE;
+    labelOfPlace.backgroundColor = [UIColor clearColor];
+    labelOfPlace.numberOfLines = 2;
+    labelOfPlace.font=[UIFont systemFontOfSize:14];
+    labelOfPlace.text = [NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"alarmPlaceKey",@"MyString", @""),NSLocalizedStringFromTable(@"chinaKey",@"MyString", @"")];
+    [_infoView addSubview:labelOfPlace];
+    
+    UILabel *labelOfDetail = [[UILabel alloc]initWithFrame:CGRectMake(10, 45, 300, 105)];
+    labelOfDetail.tag = TAG_LABEL_DETAIL;
+    labelOfDetail.backgroundColor = [UIColor clearColor];
+    labelOfDetail.numberOfLines = 0;
+    labelOfDetail.font=[UIFont systemFontOfSize:14];
+    labelOfDetail.text = [NSString stringWithFormat:NSLocalizedStringFromTable(@"noDetailedParameters",@"MyString", @"")];
+    [_infoView addSubview:labelOfDetail];
+    
+    [self.view addSubview:_infoView];
+    
+    if (IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {            //IOS7.0 3.5寸屏幕
+        [_tableView setFrame:CGRectMake(0, 64, 320, 416)];
+	}
+    if (!IOS7_OR_LATER && DEVICE_IS_IPHONE5) {            //IOS6.0 4.0寸屏幕
+        [_tableView setFrame:CGRectMake(0, 0, 320, 504)];
+    }
+    if (IOS7_OR_LATER && DEVICE_IS_IPHONE5) {             //IOS7.0 4.0寸屏幕
+        [_tableView setFrame:CGRectMake(0, 64, 320, 504)];
+	}
+
+    [self requestHistorysWithDeviceID:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    [self infoViewDisplayOrNot:NO];
+}
+
+- (void)labelsTextWithHistoryPoint:(NSDictionary *)aHistoryPoint
+{
+    
+//    ((UILabel *)[self.view viewWithTag:TAG_LABEL_TYPE]).text = [NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"alarmTypeKey",@"MyString", @""),[[ADSingletonUtil sharedInstance] alertNameByCode:[aHistoryPoint objectForKey:@"code"]]];
+//    ((UILabel *)[self.view viewWithTag:TAG_LABEL_DATE]).text = [NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"alarmTimeKey",@"MyString", @""), [aHistoryPoint objectForKey:@"serverDate"]];
+    ((UILabel *)[self.view viewWithTag:TAG_LABEL_PLACE]).text = [NSString stringWithFormat:@"%@:%@%@%@%@%@",NSLocalizedStringFromTable(@"alarmPlaceKey",@"MyString", @""), [aHistoryPoint objectForKey:@"address_state"],[aHistoryPoint objectForKey:@"address_city"],[aHistoryPoint objectForKey:@"address_street"],[aHistoryPoint objectForKey:@"address_num"],NSLocalizedStringFromTable(@"nearKey",@"MyString", @"")];
+    
+    UILabel *detailLabel=(UILabel *)[self.view viewWithTag:TAG_LABEL_DETAIL];
+    int code=[[aHistoryPoint objectForKey:@"code"] intValue];
+    switch (code) {
+        case 3000:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"time_remove",@"MyString", @""),[aHistoryPoint objectForKey:@"time_remove"]];
+            break;
+        case 3001:
+            NSLog(@"XXX");
+            break;
+        case 3003:
+            NSLog(@"XXX");
+            break;
+        case 3006:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@%@\n%@%@%@\n%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"geoID",@"MyString", @""),[aHistoryPoint objectForKey:@"geoID"],NSLocalizedStringFromTable(@"speed",@"MyString", @""),[aHistoryPoint objectForKey:@"speed"],@"KM/H",NSLocalizedStringFromTable(@"engineRPM",@"MyString", @""),[aHistoryPoint objectForKey:@"engineRPM"],@"转/秒",NSLocalizedStringFromTable(@"batt_level",@"MyString", @""),[aHistoryPoint objectForKey:@"batt_level"],@"V"];
+            break;
+        case 3008:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"num_of_dtc",@"MyString", @""),[aHistoryPoint objectForKey:@"num_of_dtc"]];
+            break;
+        case 3009:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"num_of_dtc",@"MyString", @""),[aHistoryPoint objectForKey:@"num_of_dtc"]];
+            break;
+        case 3010:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"speed",@"MyString", @""),[aHistoryPoint objectForKey:@"speed"],NSLocalizedStringFromTable(@"engineRPM",@"MyString", @""),[aHistoryPoint objectForKey:@"engineRPM"]];
+            break;
+        case 3011:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"speed",@"MyString", @""),[aHistoryPoint objectForKey:@"speed"],NSLocalizedStringFromTable(@"engineRPM",@"MyString", @""),[aHistoryPoint objectForKey:@"engineRPM"]];
+            break;
+        case 3012:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"batt_level",@"MyString", @""),[aHistoryPoint objectForKey:@"batt_level"]];
+            break;
+        case 3013:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"unauth_time",@"MyString", @""),[aHistoryPoint objectForKey:@"unauth_time"]];
+            break;
+        case 3014:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"driving_dist",@"MyString", @""),[aHistoryPoint objectForKey:@"driving_dist"],NSLocalizedStringFromTable(@"fuel_level_now",@"MyString", @""),[aHistoryPoint objectForKey:@"fuel_level_now"]];
+            break;
+//        case 3015:
+//            break;
+        case 3016:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"driving_dist",@"MyString", @""),[aHistoryPoint objectForKey:@"driving_dist"],NSLocalizedStringFromTable(@"fuel_consumption",@"MyString", @""),[aHistoryPoint objectForKey:@"fuel_consumption"]==nil?NSLocalizedStringFromTable(@"requestfail",@"MyString", @""):[aHistoryPoint objectForKey:@"fuel_consumption"]];
+            break;
+        case 3017:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"high_temp",@"MyString", @""),[aHistoryPoint objectForKey:@"high_temp"]];
+            break;
+        case 3018:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"idle_time",@"MyString", @""),[aHistoryPoint objectForKey:@"idle_time"],NSLocalizedStringFromTable(@"engineRPM",@"MyString", @""),[aHistoryPoint objectForKey:@"engineRPM"]];
+            break;
+        case 3019:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"fuel_level_bef",@"MyString", @""),[aHistoryPoint objectForKey:@"fuel_level_bef"],NSLocalizedStringFromTable(@"fuel_level_now",@"MyString", @""),[aHistoryPoint objectForKey:@"fuel_level_now"]];
+            break;
+        case 3020:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"speed_dir",@"MyString", @""),[aHistoryPoint objectForKey:@"speed_dir"]];
+            break;
+        case 3024:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"raw_data_include",@"MyString", @""),[aHistoryPoint objectForKey:@"raw_data_include"],@"accel_x,y,z：",[aHistoryPoint objectForKey:@"accel_x,y,z"],@"raw_x,y,z：",[aHistoryPoint objectForKey:@"raw_x,y,z"]];
+            break;
+        case 3025:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@\n%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"raw_data_include",@"MyString", @""),[aHistoryPoint objectForKey:@"raw_data_include"],@"accel_x,y,z：",[aHistoryPoint objectForKey:@"accel_x,y,z"],@"raw_x,y,z：",[aHistoryPoint objectForKey:@"raw_x,y,z"],NSLocalizedStringFromTable(@"speed_corner",@"MyString", @""),[aHistoryPoint objectForKey:@"speed_corner"]];
+            break;
+        case 3026:
+            detailLabel.text=[NSString stringWithFormat:@"%@%@%@\n%@%@\n%@%@",NSLocalizedStringFromTable(@"DetailedParameters",@"MyString", @""),NSLocalizedStringFromTable(@"raw_data_include",@"MyString", @""),[aHistoryPoint objectForKey:@"raw_data_include"],@"accel_x,y,z：",[aHistoryPoint objectForKey:@"accel_x,y,z"],@"raw_x,y,z：",[aHistoryPoint objectForKey:@"raw_x,y,z"]];
+            break;
+        default:
+            detailLabel.text=NSLocalizedStringFromTable(@"noDetailedParameters",@"MyString", @"");
+            break;
+    }
+}
+
+- (void)infoViewDisplayOrNot:(BOOL)aIsShow
+{
+    if (aIsShow) {
+        [_infoView setHidden:NO];
+    } else {
+        [_infoView setHidden:YES];
+    }
+}
+
+- (void)requestHistorysWithDeviceID:(NSString *)aDeviceId
+{
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+    [_historyModel requestAlertsWithDeviceID:aDeviceId
+                                   startDate:[NSDate dateWithTimeIntervalSince1970:0]
+                                     endDate:[NSDate localDate]
+                                        type:@"1"
+                                         row:@"30"
+                                        page:@"1"];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == self.devicesModel) {
+        if ([keyPath isEqualToString:KVO_DEVICE_DETAIL_PATH_NAME]) {
+            [self requestHistorysWithDeviceID:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID];
+        }
+    } else if (object == _historyModel) {
+        if ([keyPath isEqualToString:KVO_ALERT_PATH_NAME]) {
+            [_tableView reloadData];
+            return;
+        }
+    }
+    return [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self labelsTextWithHistoryPoint:[_historyModel.alerts objectAtIndex:indexPath.row]];
+    [self infoViewDisplayOrNot:YES];
+    [self performSelector:@selector(deselect) withObject:nil afterDelay:0.5f];
+}
+- (void)deselect
+{
+    [_tableView deselectRowAtIndexPath:[_tableView indexPathForSelectedRow] animated:YES];
+}
+
+#pragma mark - UITableViewDataDelegate
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 41;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [_historyModel.alerts count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *idStr = @"ADAlertViewController.cell";
+    ADAlertCell *cell = [_tableView dequeueReusableCellWithIdentifier:idStr];
+    NSDictionary *historyPoint = [_historyModel.alerts objectAtIndex:indexPath.row];
+//    if (!cell) {
+        cell = [[ADAlertCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:idStr historyPoint:historyPoint];
+//    }
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,40, cell.bounds.size.width, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [cell addSubview:lineView];
+    
+    NSLog(@"%@",[historyPoint objectForKey:@"code"]);
+    [cell updateUIByHistoryPoint:historyPoint];
+    cell.detailTextLabel.textColor=[UIColor lightGrayColor];
+    cell.selectionStyle=UITableViewCellSelectionStyleGray;
+    return cell;
+}
+
+#pragma mark - requesthandle
+- (void)requestAlsersSuccess:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestAlsersFail:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:NSLocalizedStringFromTable(@"networkAnomalyKey",@"MyString", @"")];
+}
+
+- (void)requestAlsersTimeout:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:NSLocalizedStringFromTable(@"networkTimeoutKey",@"MyString", @"")];
+}
+
+- (void)LoginTimeOut{
+    UIViewController* login=[[ADiPhoneLoginViewController alloc]initWithNibName:nil bundle:nil];
+    [self.view.window setRootViewController:login];
+}
+
+@end

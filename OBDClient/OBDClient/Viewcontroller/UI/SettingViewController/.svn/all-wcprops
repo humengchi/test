@@ -1,0 +1,149 @@
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController
+END
+ADiPhoneSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADiPhoneSettingViewController.m
+END
+NotificationStatusCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LBS/!svn/ver/4849/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/NotificationStatusCell.h
+END
+ADSettingItemViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADSettingItemViewController.xib
+END
+ADMessageSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/LBS/!svn/ver/5192/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADMessageSettingViewController.m
+END
+SearchOrganCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/4837/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/SearchOrganCell.h
+END
+ADFeedBackViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADFeedBackViewController.m
+END
+NotificationStatusCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/LBS/!svn/ver/4885/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/NotificationStatusCell.m
+END
+ADSettingItemViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADSettingItemViewController.h
+END
+SearchOrganCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/4837/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/SearchOrganCell.m
+END
+ADSettingItemViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 123
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADSettingItemViewController.m
+END
+ADUserLocationSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/4836/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADUserLocationSettingViewController.h
+END
+ADAboutViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADAboutViewController.xib
+END
+ADUserLocationSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADUserLocationSettingViewController.m
+END
+ADAboutViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADAboutViewController.h
+END
+ADiPhoneSettingViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADiPhoneSettingViewController.xib
+END
+ADSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADSettingViewController.h
+END
+ADFeedBackViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/LBS/!svn/ver/4949/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADFeedBackViewController.xib
+END
+ADAboutViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADAboutViewController.m
+END
+ADiPhoneSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADiPhoneSettingViewController.h
+END
+NotificationStatusCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LBS/!svn/ver/4885/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/NotificationStatusCell.xib
+END
+ADSettingViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 119
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADSettingViewController.m
+END
+ADMessageSettingViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 126
+/svn/LBS/!svn/ver/4859/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADMessageSettingViewController.h
+END
+SearchOrganCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/LBS/!svn/ver/4837/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/SearchOrganCell.xib
+END
+ADFeedBackViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/LBS/!svn/ver/4774/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/SettingViewController/ADFeedBackViewController.h
+END

@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController
+END
+ADGeoLineDraw.m
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LBS/!svn/ver/5158/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeoLineDraw.m
+END
+ADiPhoneGeofenceViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 129
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADiPhoneGeofenceViewController.xib
+END
+ADGeofenceDraw.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/5158/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceDraw.h
+END
+ADGeofenceViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceViewController.h
+END
+ADGeofenceCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/5167/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceCell.h
+END
+ADGeofenceUpdateViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceUpdateViewController.h
+END
+ADiPhoneGeofenceViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADiPhoneGeofenceViewController.h
+END
+ADGeofenceDraw.m
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/5158/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceDraw.m
+END
+ADGeofenceViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceViewController.m
+END
+ADGeoLineDraw.h
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LBS/!svn/ver/5158/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeoLineDraw.h
+END
+ADGeofenceCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceCell.m
+END
+ADGeofenceUpdateViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADGeofenceUpdateViewController.m
+END
+ADiPhoneGeofenceViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 127
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/GeofenceViewController/ADiPhoneGeofenceViewController.m
+END

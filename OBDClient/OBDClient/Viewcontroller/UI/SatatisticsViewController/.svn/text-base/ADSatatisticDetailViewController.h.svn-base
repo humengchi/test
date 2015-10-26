@@ -1,0 +1,47 @@
+//
+//  ADSatatisticDetailViewController.h
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-18.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "ADCountCenterModel.h"
+#import "ADSingletonUtil.h"
+#import "CorePlot-CocoaTouch.h"
+
+#include "ADDefine.h"
+
+@interface ADSatatisticDetailViewController : UIViewController<ADCountCenterDeleagte,CPTBarPlotDataSource>
+
+@property (nonatomic) NSString *satatisticTitle;
+
+@property(strong,nonatomic)ADCountCenterModel* countCenterModel;
+
+@property(strong,nonatomic)NSDate* currentShowDate;
+
+@property(strong,nonatomic)NSString* currentShowDateStr;
+
+@property(strong,nonatomic)NSDateFormatter* formatter;
+
+@property(strong,nonatomic)NSDateComponents* component;
+
+@property(strong,nonatomic)NSCalendar* cal;
+
+@property(strong,nonatomic)CPTXYGraph* barChart;
+
+@property(strong,nonatomic)NSArray* meliageArray;
+
+@property(strong,nonatomic)CPTBarPlot* barPlot;
+
+@property(strong,nonatomic)CPTXYPlotSpace* plotSpace;
+
+@property(strong,nonatomic)UILabel* monthMeliageCountLabel;
+
+@property(strong,nonatomic)UILabel* dayAverageMeliageLabel;
+
+@property(strong,nonatomic)UILabel* showCalendarLabel;
+
+
+@end

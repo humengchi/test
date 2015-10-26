@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/LBS/!svn/ver/5052/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles
+END
+ADVehicleInsure.h
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/4707/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleInsure.h
+END
+ADVehicleSettingConfig.m
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/LBS/!svn/ver/5052/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleSettingConfig.m
+END
+ADVehiclesModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehiclesModel.m
+END
+ADVehicleBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleBase.h
+END
+ADVehicleInsure.m
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/4707/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleInsure.m
+END
+ADVehicleBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleBase.m
+END
+ADVehicleSettingConfig.h
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/LBS/!svn/ver/5052/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehicleSettingConfig.h
+END
+ADVehiclesModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Vehicles/ADVehiclesModel.h
+END

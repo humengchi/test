@@ -1,0 +1,745 @@
+//
+//  ADVehiclesModel.m
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-26.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADVehiclesModel.h"
+#import "IVToastHUD.h"
+
+NSString * const ADVehiclesModelRequestVehicleInfoSuccessNotification   = @"ADVehiclesModelRequestVehicleInfoSuccessNotification";
+NSString * const ADVehiclesModelRequestVehicleInfoFailNotification      = @"ADVehiclesModelRequestVehicleInfoFailNotification";
+NSString * const ADVehiclesModelRequestVehicleInfoTimeoutNotification   = @"ADVehiclesModelRequestVehicleInfoTimeoutNotification";
+
+NSString * const ADVehiclesModelSetVehicleInfoSuccessNotification   = @"ADVehiclesModelSetVehicleInfoSuccessNotification";
+NSString * const ADVehiclesModelSetVehicleInfoFailNotification      = @"ADVehiclesModelSetVehicleInfoFailNotification";
+NSString * const ADVehiclesModelSetVehicleInfoTimeoutNotification   = @"ADVehiclesModelSetVehicleInfoTimeoutNotification";
+
+NSString * const ADVehiclesModelRequestVehicleInfoForInsureSuccessNotification   = @"ADVehiclesModelRequestVehicleInfoForInsureSuccessNotification";
+NSString * const ADVehiclesModelRequestVehicleInfoForInsureFailNotification      = @"ADVehiclesModelRequestVehicleInfoForInsureFailNotification";
+NSString * const ADVehiclesModelRequestVehicleInfoForInsureTimeoutNotification   = @"ADVehiclesModelRequestVehicleInfoForInsureTimeoutNotification";
+
+NSString * const ADVehiclesModelSetVehicleInfoForInsureSuccessNotification   = @"ADVehiclesModelSetVehicleInfoForInsureSuccessNotification";
+
+NSString * const ADVehiclesModelSetVehicleGateWaySuccessNotification   = @"ADVehiclesModelSetVehicleGateWaySuccessNotification";
+
+NSString * const ADVehiclesModelSetVehicleModelTypeSuccessNotification   = @"ADVehiclesModelSetVehicleModelTypeSuccessNotification";
+
+NSString * const ADVehiclesModelSetVehicleSettingConfigSuccessNotification   = @"ADVehiclesModelSetVehicleSettingConfigSuccessNotification";
+
+
+NSString * const ADVehiclesModelSetAuthUserSuccessNotification   = @"ADVehiclesModelSetAuthUserSuccessNotification";
+
+NSString * const ADVehiclesModelAddVehicleSuccessNotification   = @"ADVehiclesModelAddVehicleSuccessNotification";
+
+NSString * const ADVehiclesModelAddVehicleExistNotification   = @"ADVehiclesModelAddVehicleExistNotification";
+
+NSString * const ADVehiclesModelAddVehicleErrorNotification   = @"ADVehiclesModelAddVehicleErrorNotification";
+
+
+NSString * const ADVehiclesModelDeleteVehicleSuccessNotification   = @"ADVehiclesModelDeleteVehicleSuccessNotification";
+
+NSString * const ADVehiclesModelDeleteVehicleFailNotification   = @"ADVehiclesModelDeleteVehicleFailNotification";
+
+
+NSString * const ADVehiclesModelBindDeviceSuccessNotification   = @"ADVehiclesModelBindDeviceSuccessNotification";
+
+NSString * const ADVehiclesModelBindDeviceErrorNotification   = @"ADVehiclesModelBindDeviceErrorNotification";
+
+NSString * const ADVehiclesModelActiveDeviceSendSuccessNotification   = @"ADVehiclesModelActiveDeviceSendSuccessNotification";
+
+NSString * const ADVehiclesModelActiveDeviceSuccessNotification   = @"ADVehiclesModelActiveDeviceSuccessNotification";
+
+NSString * const ADVehiclesModelActiveDeviceFailNotification   = @"ADVehiclesModelActiveDeviceFailNotification";
+
+NSString * const ADVehiclesModelUnbindDeviceSuccessNotification   = @"ADVehiclesModelUnbindDeviceSuccessNotification";
+
+NSString * const ADVehiclesModelrequestVehicleDetectionFailNotification   = @"ADVehiclesModelrequestVehicleDetectionFailNotification";
+
+NSString * const ADVehiclesModelShareVehicleSuccessNotification   = @"ADVehiclesModelShareVehicleSuccessNotification";
+
+NSString * const ADVehiclesModelrequest4sInfoSuccessNotification   = @"ADVehiclesModelrequest4sInfoSuccessNotification";
+
+NSString * const ADVehiclesModelSet4sStoreSuccessNotification   = @"ADVehiclesModelSet4sStoreSuccessNotification";
+
+NSString * const ADVehiclesModelSetDefenceSuccessNotification   = @"ADVehiclesModelSetDefenceSuccessNotification";
+
+NSString * const ADVehiclesModelGetSettingConfigResultNotification   = @"ADVehiclesModelGetSettingConfigResultNotification";
+
+NSString * const ADVehiclesModelGetGatewayConfigResultNotification   = @"ADVehiclesModelGetGatewayConfigResultNotification";
+
+NSString * const ADVehiclesModelSetSellsInfoSuccessNotification   = @"ADVehiclesModelSetSellsInfoSuccessNotification";
+
+NSString * const ADVehiclesModelAuthVehicleFailNotification   = @"ADVehiclesModelAuthVehicleFailNotification";
+
+NSString * const ADVehiclesModelGetConditionTimeOutNotification   = @"ADVehiclesModelGetConditionTimeOutNotification";
+
+NSString * const ADVehiclesModelUpdateBaseInfoSuccessNotification   = @"ADVehiclesModelUpdateBaseInfoSuccessNotification";
+
+NSString * const ADVehiclesModelGetStatusDeatailNotification   = @"ADVehiclesModelGetStatusDeatailNotification";
+
+NSString * const ADVehiclesModelDeleteAuthUserSuccessNotification   = @"ADVehiclesModelDeleteAuthUserSuccessNotification";
+
+NSString * const ADVehiclesModelLoginTimeOutNotification =@"ADVehiclesModelLoginTimeOutNotification";
+
+
+
+#define VEHICLE_GET_ACTIVE_STATUS_MAX  10
+#define VEHICLE_GET_CONDITION_STATUS_MAX  6
+
+
+
+@implementation ADVehiclesModel
+
+- (void)dealloc
+{
+    if (_timer) {
+        [_timer invalidate];
+    }else if (_activeTimer){
+        [_activeTimer invalidate];
+    }
+}
+
+- (void)cancel
+{
+    if (_timer) {
+        [_timer invalidate];
+    }else if (_activeTimer){
+        [_activeTimer invalidate];
+    }
+    [super cancel];
+}
+
+
+- (void)setVehicleInfoWithArguments:(NSArray*)aArguments{
+    _requestType = SET_VEHICLE_INFO_LICENSE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_SET_VEHICLE_INFO_METHOD arguments:aArguments];
+}
+
+- (void)requestVehicleInfoWithArguments:(NSArray*)aArguments{
+    _requestType = VEHICLE_INFO_LICENSE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_INFO_METHOD arguments:aArguments];
+}
+
+- (void)requestVehicleInfoForInsureWithArguments:(NSArray*)aArguments{
+    _requestType = VEHICLE_INFO_INSURE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_INFO_INSURE_METHOD arguments:aArguments];
+}
+
+- (void)setVehicleInfoForInsureWithArguments:(NSArray*)aArguments{
+    _requestType = SET_VEHICLE_INFO_INSURE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_SET_VEHICLE_INFO_INSURE_METHOD arguments:aArguments];
+}
+
+- (void)authorizeVehicleWithArguments:(NSArray*)aArguments{
+    _requestType = AUTH_VEHICLE_TO_USERID;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_AUTH_VEHICLE_TO_USERID_METHOD arguments:aArguments];
+}
+
+- (void)requestAuthorizedUsersWithArguments:(NSArray*)aArguments{
+    _requestType = VEHICLE_AUTH_USERS_GET;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_AUTH_USERS_GET_METHOD arguments:aArguments];
+}
+
+- (void)requestVehicleSettingConfigWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_SETTING_CONFIG_GET;
+    [super startCallWithService:API_VEHICLE_SETTING_SERVICE method:API_VEHICLE_SETTING_CONFIG_GET_METHOD arguments:[self argumentConfig:aArguments]];
+}
+
+- (void)setVehicleSettingConfigWithArguments:(NSMutableArray *)aArguments{
+    _requestType = VEHICLE_SETTING_CONFIG_SET;
+    [super startCallWithService:API_VEHICLE_SETTING_SERVICE method:API_VEHICLE_SETTING_CONFIG_SET_METHOD arguments:[self argumentConfig:aArguments]];
+}
+
+- (void)requestVehicleDetectionInfoWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_DETECTION;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_DETECTION_METHOD arguments:aArguments];
+}
+
+- (void)requestVehicleModelTypeWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_INFO_MODELTYPE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_INFO_MODULETYPE_METHOD arguments:aArguments];
+}
+
+- (void)setVehicleModelTypeWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_MODELTYPE_SET;
+    [super startCallWithService:API_VEHICLE_MODELTYPE_LIST_SERVICE method:API_VEHICLE_MODELTYPE_SET_METHOD arguments:aArguments];
+    
+}
+
+- (void)requestVehicleGeteWayConfigWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_INFO_GATEWAY_CONFIG;
+    [super startCallWithService:API_VEHICLE_GATEWAY_SERVICE method:API_VEHICLE_GETEWAY_CONFIG_GET_METHOD arguments:[self argumentConfig:aArguments]];
+}
+
+- (void)setVehicleGateWayConfigWithArguments:(NSArray *)aArguments{
+    _requestType = SET_VEHICLE_GATEWAY_CONFIG;
+    [super startCallWithService:API_VEHICLE_GATEWAY_SERVICE method:API_SET_VEHICLE_GATEWAY_CONFIG_METHOD arguments:[self argumentConfig:aArguments]];
+}
+
+- (void)requestVehicleModelTypeListWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_MODELTYPE_LIST_GET;
+    [super startCallWithService:API_VEHICLE_MODELTYPE_LIST_SERVICE method:API_VEHICLE_MODELTYPE_LIST_GET_METHOD arguments:aArguments];
+}
+
+- (void)addVehicleWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_ADD;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_ADD_METHOD arguments:aArguments];
+}
+
+- (void)updateBaseVehicleInfoWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_BASE_INFO_UPDATE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_BASE_INFO_UPDATE_METHOD arguments:aArguments];
+}
+
+- (void)deleteVehicleWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_DELETE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_DELE_METHOD arguments:aArguments];
+}
+
+- (void)bindDeviceWithArguments:(NSArray *)aArguments
+{
+    _requestType = VEHICLE_BIND_DEVICE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_BIND_DEVICE_METHOD arguments:[self argumentConfig:aArguments]];
+}
+
+- (void)activeDeviceWithArguments:(NSArray *)aArguments{  ////
+    _requestType = VEHICLE_AND_DEVICE_ACTIVE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_AND_DEVICE_ACTIVE_METHOD arguments:aArguments];
+}
+
+- (void)unBindDeviceWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_UNBIND_DEVICE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_UNBIND_DEVICE_METHOD arguments:aArguments];
+}
+
+- (void)shareVehicleWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_SHARE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_SHARE_METHOD arguments:aArguments];
+}
+
+- (void)requestBind4sStoreInfoWithArgument:(NSArray *)aArguments{
+    _requestType = VEHICLE_BIND4S_INFO;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_BIND4S_INFO_GET_METHOD arguments:aArguments];
+}
+
+- (void)requestCurrent4SStoresListWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_CURRENT_4SSTORES;
+    [super startCallWithService:API_SYSTEMSETTINGS_SERVICE method:API_VEHICLE_CURRENT_4SSTORES_GET_METHOD arguments:aArguments];
+}
+
+- (void)setVehicleBind4sStoreWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_SET_4SSTORE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_BIND4S_SET_METHOD arguments:aArguments];
+}
+
+- (void)setVehicleDefenceWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_SET_DEFENCE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_DENFECE_SET_METHOD arguments:aArguments];
+}
+
+- (void)setVehicleSalesInfoWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_SET_SALESINFO;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_SELL_SET_METHOD arguments:aArguments];
+}
+
+- (void)requestGetVehicleConditionCheckTimeOut:(NSArray *)aArguments{
+    _requestType = VEHICLE_GET_CONDITION_TIME_OUT;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_GET_CONDITION_TIME_OUT_METHDO arguments:aArguments];
+}
+
+- (void)requestGetVehicleStatusDeatail:(NSArray *)aArguments{
+    _requestType = VEHICLE_GET_STATUS_DEATAIL;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_GET_STATUS_DEATAIL_METHID arguments:aArguments];
+}
+
+- (void)deleteAuthUserWithArguments:(NSArray *)aArguments{
+    _requestType = VEHICLE_AUTH_USER_DELETE;
+    [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_AUTH_USER_DELETE_METHOD arguments:aArguments];
+}
+
+- (void)getFriendListsByUsername:(NSArray *)aArguments
+{
+    _requestType = VEHICLE_GET_FRIENDLISTS;
+    [super startCallWithService:API_GET_USERNAME method:API_GET_GETFRIENDLISTS arguments:aArguments];
+}
+
+- (void)getActiveStatusIndeedWithArguments:(NSArray *)aArguments continue:(BOOL)aContinue{
+    _requestType = VEHICLE_GET_ACTIVE_STATUS;
+    timeNum=0;
+    activeArg = aArguments;
+    if (aContinue) {
+        if (_activeTimer) {
+            [_activeTimer invalidate];
+            _activeTimer = nil;
+        }
+        _activeTimer = [NSTimer scheduledTimerWithTimeInterval:10
+                                                  target:self
+                                                selector:@selector(requestActiveStatusIndeed:)
+                                                userInfo:nil
+                                                 repeats:YES];
+        [_activeTimer fire];
+    }
+    [self requestActiveStatusIndeed:aArguments];
+    
+}
+
+- (void)requestActiveStatusIndeed:(NSArray *)aArguments{
+    timeNum++;
+    if(timeNum == VEHICLE_GET_ACTIVE_STATUS_MAX){
+        [_activeTimer invalidate];
+        _activeTimer = nil;
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelActiveDeviceFailNotification
+                                                            object:self];
+        
+    }else{
+        [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_ACTIVE_STATUS_GET_METHOD arguments:activeArg];
+    }
+}
+
+
+- (void)requestVehicleDetectionIndeedWithArguments:(NSArray *)aArguments continue:(BOOL)aContinue{
+    _requestType = VEHICLE_DETECTION_INDEED;
+    conditionTimeNum=0;
+    arg = aArguments;
+    if (aContinue) {
+        if (_timer) {
+            [_timer invalidate];
+            _timer = nil;
+        }
+        _timer = [NSTimer scheduledTimerWithTimeInterval:5
+                                                  target:self
+                                                selector:@selector(requestVehicleDetectionIndeed:)
+                                                userInfo:nil
+                                                 repeats:YES];
+        [_timer fire];
+    }
+
+    [self requestVehicleDetectionIndeed:aArguments];
+    
+}
+
+- (void)requestVehicleDetectionIndeed:(NSArray *)aArguments{
+    conditionTimeNum++;
+    if(conditionTimeNum>VEHICLE_GET_CONDITION_STATUS_MAX){
+        [_timer invalidate];
+        _timer = nil;
+        [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelrequestVehicleDetectionFailNotification
+                                                            object:self];
+    }else{
+        [super startCallWithService:API_VEHICLE_INFO_SERVICE method:API_VEHICLE_DETECTION_INDEED_METHOD arguments:arg];
+    }
+    
+}
+
+//成功
+- (void)requestFinishedHandleWithData:(NSArray*)aDataArray
+{
+    if (_requestType==VEHICLE_INFO_LICENSE) {
+        if(aDataArray.count>0){
+            NSDictionary *asObject = [aDataArray objectAtIndex:0];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelRequestVehicleInfoSuccessNotification
+                                                                object:self];
+            
+            self.vehicleInfo = [[ADVehicleBase alloc] initWithDictionary:asObject];
+            [ADSingletonUtil sharedInstance].vehicleInfo=self.vehicleInfo;
+        }else{
+            self.vehicleInfo=nil;
+        }
+        
+        
+    }else if (_requestType==VEHICLE_INFO_INSURE){
+        if(aDataArray.count>0){
+            NSDictionary *asObject = [aDataArray objectAtIndex:0];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelRequestVehicleInfoForInsureSuccessNotification
+                                                                object:self];
+            self.vehicleInsureInfo = [[ADVehicleInsure alloc] initWithDictionary:asObject];
+        }else{
+            self.vehicleInsureInfo=nil;
+        }
+    }else if (_requestType==VEHICLE_SETTING_CONFIG_GET){
+        if(aDataArray.count>0){
+            ASObject *asObject = [aDataArray objectAtIndex:0];
+            NSDictionary *data = [asObject properties];
+            self.vehicleSettingConfig = [[ADVehicleSettingConfig alloc] initWithDictionary:data];
+        }else{
+            self.vehicleSettingConfig=nil;
+        }
+    }else if (_requestType==VEHICLE_DETECTION){
+        if(aDataArray.count>0){
+            self.vehicleConditionCheck = (NSDictionary *)[aDataArray objectAtIndex:0];
+        }else{
+            self.vehicleConditionCheck=nil;
+        }
+        
+    }else if(_requestType == VEHICLE_DETECTION_INDEED){
+        if(aDataArray.count>0){
+            NSDictionary *asObject = [aDataArray objectAtIndex:0];
+            self.vehicleConditionCheckResult = asObject;
+        }else{
+            self.vehicleConditionCheckResult=nil;
+        }
+        
+    }else if (_requestType == VEHICLE_INFO_MODELTYPE){
+        if(aDataArray.count>0){
+            NSDictionary *asObject = [aDataArray objectAtIndex:0];
+            self.vehicleInfoModelType=asObject;
+            [ADSingletonUtil sharedInstance].vehicleBaseInfo=self.vehicleInfoModelType;
+        }else{
+            self.vehicleInfoModelType=nil;
+        }
+    }else if (_requestType == VEHICLE_INFO_GATEWAY_CONFIG){
+        if(aDataArray.count>0){
+            NSDictionary *asObject = [aDataArray objectAtIndex:0];
+            self.vehicleGateWayConfig=asObject;
+        }else{
+            self.vehicleGateWayConfig=nil;
+        }
+        
+    }else if (_requestType == VEHICLE_MODELTYPE_LIST_GET){
+        NSMutableArray *modelTemp = [[NSMutableArray alloc] initWithCapacity:[aDataArray count]];
+        for(NSDictionary *asObject in aDataArray){
+            [modelTemp addObject:asObject];
+        }
+        self.vehicleModelTypeList=modelTemp;
+    }else if (_requestType==VEHICLE_AUTH_USERS_GET){
+//        NSLog(@"VEHICLE_AUTH_USERS_GET%@",aDataArray);
+        NSMutableArray *usersTemp = [[NSMutableArray alloc] initWithCapacity:[aDataArray count]];
+        for(NSDictionary *asObject in aDataArray){
+            [usersTemp addObject:asObject];
+        }
+        self.vehicleAuthUsersList=usersTemp;
+    }else if (_requestType == VEHICLE_BIND4S_INFO){
+        if(aDataArray.count>0){
+            ASObject *asObject = [aDataArray objectAtIndex:0];
+            NSDictionary *data = [asObject properties];
+            self.vehicleBind4sInfo = data;
+        }else{
+            self.vehicleBind4sInfo = nil;
+        }
+        
+    }else if (_requestType == VEHICLE_CURRENT_4SSTORES){
+        NSMutableArray *organsTemp = [[NSMutableArray alloc] initWithCapacity:[aDataArray count]];
+        for(ASObject *asObject in aDataArray){
+            NSDictionary *data = [asObject properties];
+            [organsTemp addObject:data];
+        }
+        self.current4sStoresList=organsTemp;
+    }
+    
+    
+}
+
+
+#pragma mark - implement super class methods
+- (void)remotingDidFinishHandleWithCall:(AMFRemotingCall *)aRemotingCall
+                         receivedObject:(NSObject *)object
+{
+    NSLog(@"remotingDidFinishHandleWithCall%@",object);
+    
+    NSString *resultCode = [(NSDictionary *)object objectForKey:@"resultCode"];
+    
+    if ([resultCode isKindOfClass:[NSNull class]]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelRequestVehicleInfoFailNotification
+                                                            object:self];
+        
+        NSAssert(0,@"the data return, is null~. ADVehiclesModel");
+        return;
+    }
+    
+    if ([resultCode isEqualToString:@"200"]) {
+        if(_requestType==VEHICLE_INFO_LICENSE){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType==SET_VEHICLE_INFO_LICENSE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleInfoSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_INFO_INSURE){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType==AUTH_VEHICLE_TO_USERID){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetAuthUserSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_AUTH_USERS_GET){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }
+        else if (_requestType ==VEHICLE_SETTING_CONFIG_GET){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetSettingConfigResultNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+        }else if(_requestType == VEHICLE_DETECTION){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType == VEHICLE_DETECTION_INDEED){
+            if (_timer) {
+                [_timer invalidate];
+            }
+            NSArray *dataArray = [NSArray arrayWithObject:[(NSDictionary *)object objectForKey:@"data"]];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType==SET_VEHICLE_INFO_INSURE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleInfoForInsureSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_INFO_MODELTYPE){
+//            NSLog(@"VEHICLE_INFO_MODELTYPE%@",object);
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType == VEHICLE_INFO_GATEWAY_CONFIG){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetGatewayConfigResultNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+        }else if (_requestType == SET_VEHICLE_GATEWAY_CONFIG){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleGateWaySuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_MODELTYPE_LIST_GET){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType == VEHICLE_MODELTYPE_SET){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleModelTypeSuccessNotification
+                                                                object:self];
+        }else if (_requestType ==VEHICLE_SETTING_CONFIG_SET){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleSettingConfigSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_ADD){
+//            NSLog(@"VEHICLE_ADD%@",object);
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelAddVehicleSuccessNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+        }else if (_requestType == VEHICLE_DELETE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelDeleteVehicleSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_BIND_DEVICE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelBindDeviceSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_AND_DEVICE_ACTIVE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelActiveDeviceSendSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_GET_ACTIVE_STATUS){
+            if(_activeTimer){
+                [_activeTimer invalidate];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelActiveDeviceSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_UNBIND_DEVICE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelUnbindDeviceSuccessNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_SHARE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelShareVehicleSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_BIND4S_INFO){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelrequest4sInfoSuccessNotification
+                                                                object:self];
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType == VEHICLE_CURRENT_4SSTORES){
+            NSArray *dataArray = [(NSDictionary *)object objectForKey:@"data"];
+            [self requestFinishedHandleWithData:dataArray];
+        }else if (_requestType == VEHICLE_SET_4SSTORE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSet4sStoreSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_SET_DEFENCE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetDefenceSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_SET_SALESINFO){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetSellsInfoSuccessNotification
+                                                                object:self];
+        }else if (_requestType==VEHICLE_GET_CONDITION_TIME_OUT){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetConditionTimeOutNotification object:object];
+        }else if (_requestType==VEHICLE_BASE_INFO_UPDATE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelUpdateBaseInfoSuccessNotification object:object];
+        }else if (_requestType==VEHICLE_GET_STATUS_DEATAIL){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetStatusDeatailNotification object:object];
+        }else if (_requestType == VEHICLE_AUTH_USER_DELETE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelDeleteAuthUserSuccessNotification object:object];
+        }else if (_requestType == VEHICLE_GET_FRIENDLISTS){
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"GETFRIENDLISTS" object:object];
+        }
+    }
+    else
+    {
+        
+        if (_requestType == VEHICLE_DETECTION_INDEED){
+            if([resultCode isEqualToString:@"1010"]){
+                return;
+            }
+        }else if (_requestType == VEHICLE_GET_ACTIVE_STATUS){
+            if([resultCode isEqualToString:@"201"]){
+                return;
+            }
+        }
+        else if (_requestType ==VEHICLE_SETTING_CONFIG_GET){
+            if ([resultCode isEqualToString:@"202"]||[resultCode isEqualToString:@"203"]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelLoginTimeOutNotification object:nil];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetSettingConfigResultNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+            return;
+            //暂时在model里做错误显示
+            //        [IVToastHUD showAsToastErrorWithStatus:[[ADSingletonUtil sharedInstance] errorStringByResultCode:resultCode]];
+
+        }else if (_requestType == VEHICLE_INFO_LICENSE) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelRequestVehicleInfoFailNotification
+                                                                object:self];
+        }else if (_requestType == SET_VEHICLE_INFO_LICENSE){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleInfoFailNotification
+                                                                object:self];
+        }else if (_requestType == VEHICLE_INFO_INSURE){
+            
+        }else if (_requestType == AUTH_VEHICLE_TO_USERID){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelAuthVehicleFailNotification
+                                                                object:self
+                                                              userInfo:(NSDictionary *)object];
+        }else if (_requestType == VEHICLE_DETECTION){
+            
+            
+        }else if (_requestType == VEHICLE_DETECTION_INDEED){
+            if([resultCode isEqualToString:@"1010"]){
+                return;
+            }
+        }
+        else if (_requestType == SET_VEHICLE_INFO_INSURE){
+            
+        }else if (_requestType == VEHICLE_INFO_MODELTYPE){
+            
+        }else if (_requestType == VEHICLE_INFO_GATEWAY_CONFIG){
+            if ([resultCode isEqualToString:@"202"]||[resultCode isEqualToString:@"203"]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelLoginTimeOutNotification object:nil];
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetGatewayConfigResultNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+
+        }else if (_requestType == SET_VEHICLE_GATEWAY_CONFIG){
+            if ([resultCode isEqualToString:@"202"]||[resultCode isEqualToString:@"203"]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelLoginTimeOutNotification object:nil];
+            }
+        }else if (_requestType == VEHICLE_MODELTYPE_LIST_GET){
+            
+        }else if (_requestType == VEHICLE_MODELTYPE_SET){
+            
+        }else if (_requestType ==VEHICLE_SETTING_CONFIG_GET){
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelGetSettingConfigResultNotification
+                                                                object:self userInfo:(NSDictionary *)object];
+        }
+        
+        else if (_requestType ==VEHICLE_SETTING_CONFIG_SET){
+            if ([resultCode isEqualToString:@"202"]||[resultCode isEqualToString:@"203"]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelLoginTimeOutNotification object:nil];
+            }
+
+        }else if (_requestType == VEHICLE_ADD){
+            if([resultCode isEqualToString:@"1007"]){
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelAddVehicleExistNotification
+                                                                    object:self];
+            }else if([resultCode isEqualToString:@"1001"]){
+                [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelAddVehicleErrorNotification
+                                                                    object:self];
+            }
+        }else if (_requestType == VEHICLE_DELETE){
+            NSLog(@"%@",resultCode);
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ADVehiclesModelDeleteVehicleFailNotification" object:(NSDictionary *)object];
+            return;
+        }else if (_requestType == VEHICLE_BIND_DEVICE){
+            NSLog(@"VEHICLE_BIND_DEVICE Error");
+            [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelBindDeviceErrorNotification
+                                                                object:self userInfo:(NSDictionary*)object];
+        }else if (_requestType == VEHICLE_AND_DEVICE_ACTIVE){
+        
+        }else if (_requestType == VEHICLE_GET_ACTIVE_STATUS){
+            
+        }else if (_requestType == VEHICLE_UNBIND_DEVICE){
+        
+        }else if (_requestType == VEHICLE_SHARE){
+        
+        }else if (_requestType==VEHICLE_BIND4S_INFO){
+            
+        }else if (_requestType == VEHICLE_CURRENT_4SSTORES){
+            
+        }else if (_requestType == VEHICLE_SET_4SSTORE){
+            
+        }else if (_requestType==VEHICLE_SET_DEFENCE){
+            
+        }else if (_requestType==VEHICLE_SET_SALESINFO){
+            
+        }else if (_requestType==VEHICLE_BASE_INFO_UPDATE){
+
+        }
+        
+        else {
+//            NSAssert(0, @"not handle request type");
+        }
+        
+        
+    }
+}
+
+- (void)remotingDidFailHandleWithCall:(AMFRemotingCall *)aRemotingCall error:(NSError *)aError
+{
+    if (_requestType == VEHICLE_INFO_LICENSE) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelRequestVehicleInfoFailNotification
+                                                            object:self];
+    }else if (_requestType == SET_VEHICLE_INFO_LICENSE){
+        [[NSNotificationCenter defaultCenter] postNotificationName:ADVehiclesModelSetVehicleInfoFailNotification
+                                                            object:self];
+    }else if (_requestType==VEHICLE_INFO_INSURE){
+        
+    }else if (_requestType==AUTH_VEHICLE_TO_USERID){
+        
+    }else if (_requestType == VEHICLE_DETECTION){
+        
+    }else if (_requestType == SET_VEHICLE_INFO_INSURE){
+        
+    }else if (_requestType == VEHICLE_INFO_MODELTYPE){
+        
+    }else if (_requestType == VEHICLE_INFO_GATEWAY_CONFIG){
+        
+    }else if (_requestType == SET_VEHICLE_GATEWAY_CONFIG){
+        
+    }else if (_requestType == VEHICLE_MODELTYPE_LIST_GET){
+        
+    }else if (_requestType == VEHICLE_MODELTYPE_SET){
+        
+    }else if (_requestType ==VEHICLE_SETTING_CONFIG_SET){
+        
+    }else if (_requestType == VEHICLE_ADD){
+        
+    }else if (_requestType == VEHICLE_DELETE){
+        NSLog(@"VEHICLE_DELETE Fail");
+    }else if (_requestType == VEHICLE_BIND_DEVICE){
+        NSLog(@"VEHICLE_BIND_DEVICE Fail");
+        
+    }else if (_requestType == VEHICLE_AND_DEVICE_ACTIVE){
+        
+    }else if (_requestType == VEHICLE_GET_ACTIVE_STATUS){
+        
+    }else if (_requestType == VEHICLE_UNBIND_DEVICE){
+        
+    }else if (_requestType == VEHICLE_SHARE){
+        
+    }else if (_requestType==VEHICLE_BIND4S_INFO){
+        
+    }else if (_requestType == VEHICLE_CURRENT_4SSTORES){
+        
+    }else if (_requestType == VEHICLE_SET_4SSTORE){
+        
+    }else if (_requestType==VEHICLE_SET_DEFENCE){
+        
+    }else if (_requestType==VEHICLE_SET_SALESINFO){
+        
+    }
+    
+    else {
+        NSAssert(0, @"not handle request type");
+    }
+}
+
+
+@end
+
+

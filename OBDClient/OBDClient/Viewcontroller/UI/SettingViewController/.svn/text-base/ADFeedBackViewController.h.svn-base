@@ -1,0 +1,13 @@
+//
+//  ADFeedBackViewController.h
+//  OBDClient
+//
+//  Created by lbs anydata on 13-12-13.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADBaseViewController.h"
+
+@interface ADFeedBackViewController : ADBaseViewController
+@property (weak, nonatomic) IBOutlet UITextView *feedBackText;
+@end

@@ -1,0 +1,113 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/LBS/!svn/ver/4887/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView
+END
+ADCarsShowView.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADCarsShowView.h
+END
+ADGaugeView.m
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LBS/!svn/ver/4774/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADGaugeView.m
+END
+ADCarsShowView.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADCarsShowView.m
+END
+ADNavigationController_iPad.xib
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADNavigationController_iPad.xib
+END
+ADNavigationController_iPhone.xib
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADNavigationController_iPhone.xib
+END
+ADNavigationController.h
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADNavigationController.h
+END
+ADPageIndicatorView.h
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADPageIndicatorView.h
+END
+ADStyleNavigationBar.h
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADStyleNavigationBar.h
+END
+ADBaseCellBackgroundView.h
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADBaseCellBackgroundView.h
+END
+ADNavigationController.m
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADNavigationController.m
+END
+ADPageIndicatorView.m
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADPageIndicatorView.m
+END
+ADStyleNavigationBar.m
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADStyleNavigationBar.m
+END
+ADBaseCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADBaseCell.h
+END
+ADBaseCellBackgroundView.m
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADBaseCellBackgroundView.m
+END
+ADMainWindow.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADMainWindow.h
+END
+ADBaseCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADBaseCell.m
+END
+ADMainWindow.m
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LBS/!svn/ver/4887/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADMainWindow.m
+END
+ADGaugeView.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CustomView/ADGaugeView.h
+END

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/LBS/!svn/ver/4899/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Alerts
+END
+ADDTCBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Alerts/ADDTCBase.h
+END
+ADDTCBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/4899/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Alerts/ADDTCBase.m
+END
+ADDTCsModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Alerts/ADDTCsModel.h
+END
+ADDTCsModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Alerts/ADDTCsModel.m
+END

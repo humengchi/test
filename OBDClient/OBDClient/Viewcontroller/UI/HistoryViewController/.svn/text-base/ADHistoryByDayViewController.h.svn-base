@@ -1,0 +1,39 @@
+//
+//  ADHistoryByDayViewController.h
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-13.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "BMapKit.h"
+#import "ADHistoryCell.h"
+#import "ADHistoryModel.h"
+#import "ADBaseViewController.h"
+//#import "ADHistroyMapViewController.h"
+
+@class ADHistoryByDayViewController;
+@protocol ADClickCellViewDelegate <NSObject>
+
+- (void) clickCellViewController:(ADHistoryByDayViewController *) historyByDayView Argumets:(NSArray *)aArgumets;
+
+@end
+
+
+@interface ADHistoryByDayViewController : ADBaseViewController <BMKMapViewDelegate, UITableViewDelegate, UITableViewDataSource>
+{
+    IBOutlet BMKMapView *_mapView;
+    UITableView *_tableView;
+    NSArray *_dataSource;//ADHistoryPoints.
+    BMKPolyline *_routeLine;
+    BMKMapRect _routRect;
+}
+@property (nonatomic) ADHistoryModel *historyModel;
+//@property (nonatomic) ADHistroyMapViewController *historyMapView;
+@property (nonatomic) UIButton *changeButton;
+@property (nonatomic,weak) id<ADClickCellViewDelegate> delegate;
+
+- (void)updateUIByDataSource:(NSArray *)aDataSource;
+
+@end

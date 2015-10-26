@@ -1,0 +1,558 @@
+//
+//  ADUserLocationSettingViewController.m
+//  OBDClient
+//
+//  Created by hys on 23/10/13.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADUserLocationSettingViewController.h"
+
+NSString* const ADSendToCarAssistantCurrentSelectedCityNotification = @"ADSendToCarAssistantCurrentSelectedCityNotification";
+
+@interface ADUserLocationSettingViewController ()
+
+@end
+
+@implementation ADUserLocationSettingViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userLocationSettingCurrentCity:) name:ADSendToUserLocationSettingCurrentSelectedCityNotification object:nil];
+        [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(autoTurnPage:) name:ADSendToUserLocationSettingNotification object:nil];
+        
+        
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+	// Do any additional setup after loading the view.
+    _searchOrganModel=[[ADSearchOrganModel alloc]init];
+    [self.view setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"app_bg~iphone.png"]]];
+   
+    UIBarButtonItem* saveButtonItem=[[UIBarButtonItem alloc]initWithTitle:NSLocalizedStringFromTable(@"saveKey",@"MyString", @"") style:UIBarButtonItemStylePlain target:self action:@selector(saveButton:)];
+    self.navigationItem.rightBarButtonItem=saveButtonItem;
+    if (IOS7_OR_LATER) {
+        saveButtonItem.tintColor=[UIColor lightGrayColor];
+    }
+    self.title=NSLocalizedStringFromTable(@"citySettingKey",@"MyString", @"");
+      
+    
+    UILabel* label1=[[UILabel alloc]initWithFrame:CGRectMake(0, 0, WIDTH, 44)];
+    label1.text=NSLocalizedStringFromTable(@"startautoregistrationKey",@"MyString", @"");
+    label1.textColor=[UIColor whiteColor];
+    [label1 setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:label1];
+    
+    UIButton* autoLocationBtn=[[UIButton alloc]initWithFrame:CGRectMake(265, 5, 50, 34)];
+    [autoLocationBtn setTitle:NSLocalizedStringFromTable(@"positionKey",@"MyString", @"") forState:UIControlStateNormal];
+    [autoLocationBtn setBackgroundImage:[UIImage imageNamed:@"navbar_btn1_nor.png"] forState:UIControlStateNormal];
+    //    [searchBtn setBackgroundImage:[UIImage imageNamed:@"searchBtn.png"] forState:UIControlStateHighlighted];
+    [autoLocationBtn addTarget:self action:@selector(autoLocationButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:autoLocationBtn];
+    
+    UIImageView* line1ImgView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 44, WIDTH, 2)];
+    line1ImgView.image=[UIImage imageNamed:@"xiline.png"];
+    [self.view addSubview:line1ImgView];
+    
+    UILabel* label2=[[UILabel alloc]initWithFrame:CGRectMake(0, 46, WIDTH, 44)];
+    label2.text=NSLocalizedStringFromTable(@"manualpositionKey",@"MyString", @"");
+    label2.textColor=[UIColor whiteColor];
+    [label2 setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:label2];
+    
+    UIImageView* line2ImgView=[[UIImageView alloc]initWithFrame:CGRectMake(0, 90, WIDTH, 2)];
+    line2ImgView.image=[UIImage imageNamed:@"xiline.png"];
+    [self.view addSubview:line2ImgView];
+    
+    _search=[[UISearchBar alloc]initWithFrame:CGRectMake(5, 96, 255, 44)];
+    [_search setBackgroundColor:[UIColor clearColor]];
+    [_search setBarStyle:UIBarStyleBlack];
+    [_search setBackgroundImage:[UIImage imageNamed:@"app_bg~iphone.png"]];
+    [_search setPlaceholder:NSLocalizedStringFromTable(@"pleaseEntertheCityName",@"MyString", @"")];
+    [_search resignFirstResponder];
+    [self.view addSubview:_search];
+    
+    
+    UIButton* searchBtn=[[UIButton alloc]init];
+    searchBtn.frame=CGRectMake(265, 104, 50, 34);
+    [searchBtn setTitle:NSLocalizedStringFromTable(@"searchKey",@"MyString", @"") forState:UIControlStateNormal];
+    [searchBtn setBackgroundImage:[UIImage imageNamed:@"navbar_btn1_nor.png"] forState:UIControlStateNormal];
+//    [searchBtn setBackgroundImage:[UIImage imageNamed:@"searchBtn.png"] forState:UIControlStateHighlighted];
+    [searchBtn addTarget:self action:@selector(searchButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:searchBtn];
+    
+    UILabel* hotCityLabel=[[UILabel alloc]initWithFrame:CGRectMake(5, 146, 140, 44)];
+    hotCityLabel.text=NSLocalizedStringFromTable(@"hotcityKey",@"MyString", @"");
+    hotCityLabel.textColor=[UIColor whiteColor];
+    [hotCityLabel setBackgroundColor:[UIColor clearColor]];
+    [self.view addSubview:hotCityLabel];
+    
+    UIButton* beijingBtn=[[UIButton alloc]initWithFrame:CGRectMake(0, 196, 80, 50)];
+    [beijingBtn setTitle:NSLocalizedStringFromTable(@"beijingKey",@"MyString", @"") forState:UIControlStateNormal];
+    beijingBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [beijingBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [beijingBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [beijingBtn setTag:11];
+    [beijingBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:beijingBtn];
+    
+    UIButton* shanghaiBtn=[[UIButton alloc]initWithFrame:CGRectMake(80, 196, 80, 50)];
+    [shanghaiBtn setTitle:NSLocalizedStringFromTable(@"shanghaiKey",@"MyString", @"") forState:UIControlStateNormal];
+    shanghaiBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [shanghaiBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [shanghaiBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [shanghaiBtn setTag:12];
+    [shanghaiBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:shanghaiBtn];
+    
+    UIButton* guangzhouBtn=[[UIButton alloc]initWithFrame:CGRectMake(160, 196, 80, 50)];
+    [guangzhouBtn setTitle:NSLocalizedStringFromTable(@"guangzhouKey",@"MyString", @"") forState:UIControlStateNormal];
+    guangzhouBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [guangzhouBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [guangzhouBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [guangzhouBtn setTag:13];
+    [guangzhouBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:guangzhouBtn];
+    
+    UIButton* shenyangBtn=[[UIButton alloc]initWithFrame:CGRectMake(240, 196, 80, 50)];
+    [shenyangBtn setTitle:NSLocalizedStringFromTable(@"shenyangKey",@"MyString", @"") forState:UIControlStateNormal];
+    shenyangBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [shenyangBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [shenyangBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [shenyangBtn setTag:14];
+    [shenyangBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:shenyangBtn];
+    
+    
+    UIButton* nanjingBtn=[[UIButton alloc]initWithFrame:CGRectMake(0, 246, 80, 50)];
+    [nanjingBtn setTitle:NSLocalizedStringFromTable(@"nanjingKey",@"MyString", @"") forState:UIControlStateNormal];
+    nanjingBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [nanjingBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [nanjingBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [nanjingBtn setTag:15];
+    [nanjingBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:nanjingBtn];
+    
+    UIButton* xianBtn=[[UIButton alloc]initWithFrame:CGRectMake(80, 246, 80, 50)];
+    [xianBtn setTitle:NSLocalizedStringFromTable(@"xianKey",@"MyString", @"") forState:UIControlStateNormal];
+    xianBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [xianBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [xianBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [xianBtn setTag:16];
+    [xianBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:xianBtn];
+    
+    UIButton* chengduBtn=[[UIButton alloc]initWithFrame:CGRectMake(160, 246, 80, 50)];
+    [chengduBtn setTitle:NSLocalizedStringFromTable(@"chengduKey",@"MyString", @"") forState:UIControlStateNormal];
+    chengduBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [chengduBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [chengduBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [chengduBtn setTag:17];
+    [chengduBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:chengduBtn];
+    
+    UIButton* fuzhouBtn=[[UIButton alloc]initWithFrame:CGRectMake(240, 246, 80, 50)];
+    [fuzhouBtn setTitle:NSLocalizedStringFromTable(@"fuzhouKey",@"MyString", @"") forState:UIControlStateNormal];
+    fuzhouBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [fuzhouBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [fuzhouBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [fuzhouBtn setTag:18];
+    [fuzhouBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:fuzhouBtn];
+
+    UIButton* zhengzhouBtn=[[UIButton alloc]initWithFrame:CGRectMake(0, 296, 80, 50)];
+    [zhengzhouBtn setTitle:NSLocalizedStringFromTable(@"zhengzhouKey",@"MyString", @"") forState:UIControlStateNormal];
+    zhengzhouBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [zhengzhouBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [zhengzhouBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [zhengzhouBtn setTag:19];
+    [zhengzhouBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:zhengzhouBtn];
+    
+    UIButton* hangzhouBtn=[[UIButton alloc]initWithFrame:CGRectMake(80, 296, 80, 50)];
+    [hangzhouBtn setTitle:NSLocalizedStringFromTable(@"hangzhouKey",@"MyString", @"") forState:UIControlStateNormal];
+    hangzhouBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [hangzhouBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [hangzhouBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [hangzhouBtn setTag:20];
+    [hangzhouBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:hangzhouBtn];
+    
+    UIButton* dongwanBtn=[[UIButton alloc]initWithFrame:CGRectMake(160, 296, 80, 50)];
+    [dongwanBtn setTitle:NSLocalizedStringFromTable(@"dongwanKey",@"MyString", @"") forState:UIControlStateNormal];
+    dongwanBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [dongwanBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [dongwanBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [dongwanBtn setTag:21];
+    [dongwanBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:dongwanBtn];
+    
+    UIButton* suzhouBtn=[[UIButton alloc]initWithFrame:CGRectMake(240, 296, 80, 50)];
+    [suzhouBtn setTitle:NSLocalizedStringFromTable(@"suzhouKey",@"MyString", @"") forState:UIControlStateNormal];
+    suzhouBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [suzhouBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [suzhouBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [suzhouBtn setTag:22];
+    [suzhouBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:suzhouBtn];
+    
+    UIButton* chongqingBtn=[[UIButton alloc]initWithFrame:CGRectMake(0, 346, 80, 50)];
+    [chongqingBtn setTitle:NSLocalizedStringFromTable(@"chongqingKey",@"MyString", @"") forState:UIControlStateNormal];
+    chongqingBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [chongqingBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [chongqingBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [chongqingBtn setTag:23];
+    [chongqingBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:chongqingBtn];
+    
+    UIButton* changshaBtn=[[UIButton alloc]initWithFrame:CGRectMake(80, 346, 80, 50)];
+    [changshaBtn setTitle:NSLocalizedStringFromTable(@"changshaKey",@"MyString", @"") forState:UIControlStateNormal];
+    changshaBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [changshaBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [changshaBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [changshaBtn setTag:24];
+    [changshaBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:changshaBtn];
+    
+    UIButton* tianjinBtn=[[UIButton alloc]initWithFrame:CGRectMake(160, 346, 80, 50)];
+    [tianjinBtn setTitle:NSLocalizedStringFromTable(@"tianjinKey",@"MyString", @"") forState:UIControlStateNormal];
+    tianjinBtn.titleLabel.textAlignment=UITextAlignmentCenter;
+    [tianjinBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [tianjinBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateHighlighted];
+    [tianjinBtn setTag:25];
+    [tianjinBtn addTarget:self action:@selector(selectCityButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:tianjinBtn];
+
+    
+    _searchTableView=[[UITableView alloc]initWithFrame:CGRectMake(0, 160, WIDTH, 240) style:UITableViewStylePlain];
+    [_searchTableView setBackgroundColor:[UIColor colorWithPatternImage:[UIImage imageNamed:@"menu_back.png"]]];
+    _searchTableView.separatorStyle=UITableViewCellSeparatorStyleNone;
+    _searchTableView.delegate=self;
+    _searchTableView.dataSource=self;
+    [self.view addSubview:_searchTableView];
+    [_searchTableView setHidden:YES];
+    
+    if (IOS7_OR_LATER && !DEVICE_IS_IPHONE5) {            //IOS7.0 3.5寸屏幕
+        [label1 setFrame:CGRectMake(0, 64, WIDTH, 44)];
+        [autoLocationBtn setFrame:CGRectMake(265, 69, 50, 34)];
+        [line1ImgView setFrame:CGRectMake(0, 108, WIDTH, 2)];
+        [label2 setFrame:CGRectMake(0, 110, WIDTH, 44)];
+        [line2ImgView setFrame:CGRectMake(0, 154, WIDTH, 2)];
+        [_search setFrame:CGRectMake(5, 160, 255, 44)];
+        [_search setTintColor:[UIColor clearColor]];
+        [searchBtn setFrame:CGRectMake(265, 168, 50, 34)];
+        [hotCityLabel setFrame:CGRectMake(5, 210, 140, 44)];
+        [beijingBtn setFrame:CGRectMake(0, 260, 80, 50)];
+        [shanghaiBtn setFrame:CGRectMake(80, 260, 80, 50)];
+        [guangzhouBtn setFrame:CGRectMake(160, 260, 80, 50)];
+        [shenyangBtn setFrame:CGRectMake(240, 260, 80, 50)];
+        [nanjingBtn setFrame:CGRectMake(0, 310, 80, 50)];
+        [xianBtn setFrame:CGRectMake(80, 310, 80, 50)];
+        [chengduBtn setFrame:CGRectMake(160, 310, 80, 50)];
+        [fuzhouBtn setFrame:CGRectMake(240, 310, 80, 50)];
+        [zhengzhouBtn setFrame:CGRectMake(0, 360, 80, 50)];
+        [hangzhouBtn setFrame:CGRectMake(80, 360, 80, 50)];
+        [dongwanBtn setFrame:CGRectMake(160, 360, 80, 50)];
+        [suzhouBtn setFrame:CGRectMake(240, 360, 80, 50)];
+        [chongqingBtn setFrame:CGRectMake(0, 410, 80, 50)];
+        [changshaBtn setFrame:CGRectMake(80, 410, 80, 50)];
+        [tianjinBtn setFrame:CGRectMake(160, 410, 80, 50)];
+        [_searchTableView setFrame:CGRectMake(0, 224, WIDTH, 240)];
+        UIView* view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, 20)];
+        [view setBackgroundColor:[UIColor grayColor]];
+        [self.view addSubview:view];
+
+	}
+    if (!IOS7_OR_LATER && DEVICE_IS_IPHONE5) {            //IOS6.0 4.0寸屏幕
+        
+    }
+    if (IOS7_OR_LATER && DEVICE_IS_IPHONE5) {             //IOS7.0 4.0寸屏幕
+        [label1 setFrame:CGRectMake(0, 64, WIDTH, 44)];
+        [autoLocationBtn setFrame:CGRectMake(265, 69, 50, 34)];
+        [line1ImgView setFrame:CGRectMake(0, 108, WIDTH, 2)];
+        [label2 setFrame:CGRectMake(0, 110, WIDTH, 44)];
+        [line2ImgView setFrame:CGRectMake(0, 154, WIDTH, 2)];
+        [_search setFrame:CGRectMake(5, 160, 255, 44)];
+        [_search setTintColor:[UIColor clearColor]];
+        [searchBtn setFrame:CGRectMake(265, 168, 50, 34)];
+        [hotCityLabel setFrame:CGRectMake(5, 210, 140, 44)];
+        [beijingBtn setFrame:CGRectMake(0, 260, 80, 50)];
+        [shanghaiBtn setFrame:CGRectMake(80, 260, 80, 50)];
+        [guangzhouBtn setFrame:CGRectMake(160, 260, 80, 50)];
+        [shenyangBtn setFrame:CGRectMake(240, 260, 80, 50)];
+        [nanjingBtn setFrame:CGRectMake(0, 310, 80, 50)];
+        [xianBtn setFrame:CGRectMake(80, 310, 80, 50)];
+        [chengduBtn setFrame:CGRectMake(160, 310, 80, 50)];
+        [fuzhouBtn setFrame:CGRectMake(240, 310, 80, 50)];
+        [zhengzhouBtn setFrame:CGRectMake(0, 360, 80, 50)];
+        [hangzhouBtn setFrame:CGRectMake(80, 360, 80, 50)];
+        [dongwanBtn setFrame:CGRectMake(160, 360, 80, 50)];
+        [suzhouBtn setFrame:CGRectMake(240, 360, 80, 50)];
+        [chongqingBtn setFrame:CGRectMake(0, 410, 80, 50)];
+        [changshaBtn setFrame:CGRectMake(80, 410, 80, 50)];
+        [tianjinBtn setFrame:CGRectMake(160, 410, 80, 50)];
+        [_searchTableView setFrame:CGRectMake(0, 224, WIDTH, 240)];
+        UIView* view=[[UIView alloc]initWithFrame:CGRectMake(0, 0, WIDTH, 20)];
+        [view setBackgroundColor:[UIColor grayColor]];
+        [self.view addSubview:view];
+
+
+	}
+
+    
+
+}
+#pragma mark - Button Action
+-(void)autoTurnPage:(NSNotification*)aNoti{
+    NSString* city=[aNoti object];
+    _currentSelectedCity=city;
+    [[NSNotificationCenter defaultCenter] postNotificationName:ADSendToCarAssistantCurrentSelectedCityNotification object:_currentSelectedCity];
+    [self.navigationController popToViewController:[self.navigationController.viewControllers objectAtIndex:0] animated:NO];
+
+    
+}
+-(void)selectCityButton:(id)sender{
+    UIButton* btn=(UIButton*)sender;
+    int tag=btn.tag;
+    switch (tag) {
+        case 11:
+            _currentSelectedCity=@"北京";
+            break;
+        case 12:
+            _currentSelectedCity=@"上海";
+            break;
+        case 13:
+            _currentSelectedCity=@"广州";
+            break;
+        case 14:
+            _currentSelectedCity=@"沈阳";
+            break;
+        case 15:
+            _currentSelectedCity=@"南京";
+            break;
+        case 16:
+            _currentSelectedCity=@"西安";
+            break;
+        case 17:
+            _currentSelectedCity=@"成都";
+            break;
+        case 18:
+            _currentSelectedCity=@"福州";
+            break;
+        case 19:
+            _currentSelectedCity=@"郑州";
+            break;
+        case 20:
+            _currentSelectedCity=@"杭州";
+            break;
+        case 21:
+            _currentSelectedCity=@"东莞";
+            break;
+        case 22:
+            _currentSelectedCity=@"苏州";
+            break;
+        case 23:
+            _currentSelectedCity=@"重庆";
+            break;
+        case 24:
+            _currentSelectedCity=@"长沙";
+            break;
+        case 25:
+            _currentSelectedCity=@"天津";
+            break;
+
+        default:
+            break;
+    }
+    [IVToastHUD showAsToastSuccessWithStatus:@"切换城市中..."];
+    [[NSNotificationCenter defaultCenter] postNotificationName:ADSendToCarAssistantCurrentSelectedCityNotification object:_currentSelectedCity];
+    [self.navigationController popToViewController:[self.navigationController.viewControllers objectAtIndex:0] animated:NO];
+
+//    UIAlertView* alert=[[UIAlertView alloc]initWithTitle:NSLocalizedStringFromTable(@"promptKey",@"MyString", @"") message:[NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"currentCityKey",@"MyString", @""),_currentSelectedCity] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//    [alert show];
+//    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:[NSString stringWithFormat:@"当前城市设为:%@",_currentSelectedCity]];
+
+}
+
+
+-(void)autoLocationButton:(id)sender{
+//    _mapView=[[BMKMapView alloc]initWithFrame:CGRectMake(319, 479, 1, 1)];
+//    _mapView.showsUserLocation=YES;
+//    _mapView.delegate=self;
+//    [self.view addSubview:_mapView];
+    
+    _locationManager=[[CLLocationManager alloc]init];
+    _locationManager.delegate=self;
+    _locationManager.desiredAccuracy=kCLLocationAccuracyBest;
+    _locationManager.distanceFilter=500.0f;
+    [IVToastHUD showAsToastWithStatus:@"开始定位"];
+    [_locationManager startUpdatingLocation];
+    
+    
+    NSLog(@"start gps");
+    
+    
+//    NSString* city=[ADSingletonUtil sharedInstance].currentDeviceBase.address_state;
+//    NSLog(@"%@",city);
+//    
+//    _currentSelectedCity=[city substringToIndex:2];
+//    UIAlertView* alert=[[UIAlertView alloc]initWithTitle:NSLocalizedStringFromTable(@"promptKey",@"MyString", @"") message:[NSString stringWithFormat:@"%@:%@",NSLocalizedStringFromTable(@"currentCityKey",@"MyString", @""),_currentSelectedCity] delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//    [alert show];
+    
+//    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:[NSString stringWithFormat:@"当前城市设为:%@",_currentSelectedCity]];
+}
+-(void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation{
+    
+    CLGeocoder *geocoder = [[CLGeocoder alloc] init];
+    [geocoder reverseGeocodeLocation: newLocation completionHandler:^(NSArray *place, NSError *error) {
+        CLPlacemark* placemark=[place objectAtIndex:0];
+        NSString* cityStr=placemark.thoroughfare;
+//        NSString* cityName=placemark.locality;
+        NSString *cityName = placemark.administrativeArea;
+        if (cityName!=nil) {
+            _currentSelectedCity=[placemark.administrativeArea stringByReplacingOccurrencesOfString:@"市" withString:@""];
+            NSLog(@"current city:%@",_currentSelectedCity);
+            NSLog(@"location city:%@",cityStr);
+            NSLog(@"location cityName:%@",cityName);
+            [IVToastHUD showAsToastSuccessWithStatus:[NSString stringWithFormat:@"定位%@成功",_currentSelectedCity]];
+        }else{
+            [IVToastHUD showAsToastErrorWithStatus:@"定位失败"];
+        }
+        
+    }];
+}
+
+-(void)userLocationSettingCurrentCity:(NSNotification *)aNoti{
+    _currentSelectedCity=(NSString*)[aNoti object];
+
+}
+
+-(void)saveButton:(id)sender{
+    [[NSNotificationCenter defaultCenter] postNotificationName:ADSendToCarAssistantCurrentSelectedCityNotification object:_currentSelectedCity];
+    [self.navigationController popToViewController:[self.navigationController.viewControllers objectAtIndex:0] animated:NO];
+}
+
+-(void)searchButton:(id)sender{
+    NSString* test;
+    if (_search.text==nil) {
+        test=@"";
+    }else{
+        test=_search.text;
+    }
+    NSLog(@"%@",test);
+    [_searchOrganModel startRequestSearchOrganWithArguments:[NSArray arrayWithObject:test]];
+    _searchOrganModel.searchOrganDelegate=self;
+//    UIAlertView* alert=[[UIAlertView alloc]initWithTitle:NSLocalizedStringFromTable(@"promptKey",@"MyString", @"") message:NSLocalizedStringFromTable(@"searchsuccessKey",@"MyString", @"") delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//        [alert show];
+    [self.view endEditing:YES];
+}
+
+-(void)handleSearchOrganList:(NSDictionary *)dictionary{
+    NSLog(@"XX");
+    _searchArray=[dictionary objectForKey:@"data"];
+//    for (ASObject* object in _searchArray) {
+//        NSDictionary* dic=[object properties];
+//        NSLog(@"%@",[dic objectForKey:@"name"]);
+//    }
+    if ([_searchArray count]==0) {
+        [IVToastHUD showAsToastErrorWithStatus:@"没有搜索到该城市"];
+    }else{
+        [_searchTableView reloadData];
+        [_searchTableView setHidden:NO];
+    }
+    
+    
+
+}
+
+-(void)backButton:(id)sender{
+    
+    [self.navigationController popToViewController:[self.navigationController.viewControllers objectAtIndex:1] animated:NO];
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [_searchTableView setHidden:YES];
+    [self.view endEditing:YES];
+}
+
+#pragma mark -setup tableview
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if ([_searchArray count]==0) {
+        return 0;
+    }else{
+        return [_searchArray count]/4+1;
+    }
+}
+
+
+
+-(UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellIdentifier=@"SearchOrganCell";
+    SearchOrganCell *cell=[tableView dequeueReusableCellWithIdentifier:cellIdentifier];
+    if(cell==nil)
+    {
+        NSArray*xib=[[NSBundle mainBundle] loadNibNamed:@"SearchOrganCell" owner:self options:nil];
+        cell=(SearchOrganCell*)[xib objectAtIndex:0];
+        
+    }
+    cell.labOne.text=[[[_searchArray objectAtIndex:4*indexPath.row] properties]objectForKey:@"name"];
+    
+    if (4*indexPath.row+1<[_searchArray count]) {
+        cell.labTwo.text=[[[_searchArray objectAtIndex:4*indexPath.row+1] properties]objectForKey:@"name"];
+    }else{
+        cell.labTwo.text=@"";
+    }
+    
+    if (4*indexPath.row+2<[_searchArray count]) {
+         cell.labThree.text=[[[_searchArray objectAtIndex:4*indexPath.row+2] properties]objectForKey:@"name"];
+    }else{
+        cell.labThree.text=@"";
+    }
+
+    if (4*indexPath.row+3<[_searchArray count]) {
+        cell.labFour.text=[[[_searchArray objectAtIndex:4*indexPath.row+3] properties]objectForKey:@"name"];
+    }else{
+        cell.labFour.text=@"";
+    }
+
+    [cell setBackgroundColor:[UIColor clearColor]];
+    return cell;
+    
+}
+
+
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 46;
+}
+
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

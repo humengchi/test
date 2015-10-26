@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/LBS/!svn/ver/4774/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Geofence
+END
+ADGeofenceBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Geofence/ADGeofenceBase.h
+END
+ADGeofenceBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Geofence/ADGeofenceBase.m
+END
+ADGeofenceModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Geofence/ADGeofenceModel.h
+END
+ADGeofenceModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Geofence/ADGeofenceModel.m
+END

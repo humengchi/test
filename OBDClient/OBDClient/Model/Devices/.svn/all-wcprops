@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/LBS/!svn/ver/5231/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices
+END
+ADDeviceDetail.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDeviceDetail.m
+END
+ADDevicesModel.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDevicesModel.m
+END
+ADDeviceBase.h
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LBS/!svn/ver/4859/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDeviceBase.h
+END
+ADDeviceBase.m
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/LBS/!svn/ver/4949/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDeviceBase.m
+END
+ADDeviceDetail.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDeviceDetail.h
+END
+ADDevicesModel.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Model/Devices/ADDevicesModel.h
+END

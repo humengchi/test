@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 125
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController
+END
+ADVehiclePidInfoViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 158
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoViewController.h
+END
+ADVehiclePidInfoCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 148
+/svn/LBS/!svn/ver/4904/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoCell.h
+END
+ADVehiclePidInfoViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 158
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoViewController.m
+END
+ADVehiclePidInfoCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 148
+/svn/LBS/!svn/ver/4884/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoCell.m
+END
+ADVehiclePidInfoViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 160
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoViewController.xib
+END
+ADVehiclePidInfoCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 150
+/svn/LBS/!svn/ver/5132/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehiclePidInfoViewController/ADVehiclePidInfoCell.xib
+END

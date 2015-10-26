@@ -1,0 +1,101 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/LBS/!svn/ver/5235/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI
+END
+ADSatatisticPriceViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticPriceViewController.xib
+END
+ADSatatisticPriceViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticPriceViewController.h
+END
+ADUserGuideViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADUserGuideViewController.h
+END
+ADMenuBaseViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADMenuBaseViewController.h
+END
+ADSatatisticPriceViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticPriceViewController.m
+END
+ADUserGuideViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADUserGuideViewController.m
+END
+ADSatatisticAverageOilViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticAverageOilViewController.xib
+END
+ADMenuBaseViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADMenuBaseViewController.m
+END
+ADSatatisticOilViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticOilViewController.xib
+END
+ADSatatisticAverageOilViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticAverageOilViewController.h
+END
+UIUtil.h
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/LBS/!svn/ver/4707/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/UIUtil.h
+END
+ADBaseViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LBS/!svn/ver/5174/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADBaseViewController.h
+END
+ADSatatisticOilViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticOilViewController.h
+END
+ADSatatisticAverageOilViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticAverageOilViewController.m
+END
+ADBaseViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADBaseViewController.m
+END
+ADSatatisticOilViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/LBS/!svn/ver/5451/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/ADSatatisticOilViewController.m
+END

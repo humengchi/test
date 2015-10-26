@@ -1,0 +1,237 @@
+//
+//  ADInsureInfoViewController.m
+//  OBDClient
+//
+//  Created by lbs anydata on 13-9-15.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADInsureInfoViewController.h"
+#import "ADInsureInfoEditViewController.h"
+
+@interface ADInsureInfoViewController ()<ADEditInsureInfoDelegate>
+@property (nonatomic) NSArray *dataItems;
+@property (nonatomic) UITableView *tableView;
+@end
+
+@implementation ADInsureInfoViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _vehiclesModel=[[ADVehiclesModel alloc]init];
+        [_vehiclesModel addObserver:self
+                         forKeyPath:KVO_VEHICLE_INSURE_INFO_PATH_NAME
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+        
+        NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+        [notiCenter addObserver:self
+                       selector:@selector(requestVehicleInfoForInsureSuccess:)
+                           name:ADVehiclesModelRequestVehicleInfoForInsureSuccessNotification
+                         object:nil];
+        [notiCenter addObserver:self
+                       selector:@selector(requestVehicleInfoForInsureFail:)
+                           name:ADVehiclesModelRequestVehicleInfoForInsureFailNotification
+                         object:nil];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(requestVehicleInfoForInsureTimeout:)
+                           name:ADVehiclesModelRequestVehicleInfoForInsureTimeoutNotification
+                         object:nil];
+        
+        [notiCenter addObserver:self
+                       selector:@selector(setVehicleInfoForInsureSuccess:)
+                           name:ADVehiclesModelSetVehicleInfoForInsureSuccessNotification
+                         object:nil];
+    }
+    return self;
+}
+
+- (void)dealloc{
+    [_vehiclesModel removeObserver:self
+                        forKeyPath:KVO_VEHICLE_INSURE_INFO_PATH_NAME];
+    
+    NSNotificationCenter *notiCenter = [NSNotificationCenter defaultCenter];
+    [notiCenter removeObserver:self
+                       name:ADVehiclesModelRequestVehicleInfoForInsureSuccessNotification
+                     object:nil];
+    [notiCenter removeObserver:self
+                       name:ADVehiclesModelRequestVehicleInfoForInsureFailNotification
+                     object:nil];
+    [notiCenter removeObserver:self
+                       name:ADVehiclesModelRequestVehicleInfoForInsureTimeoutNotification
+                     object:nil];
+    
+    [notiCenter removeObserver:self
+                          name:ADVehiclesModelSetVehicleInfoForInsureSuccessNotification
+                        object:nil];
+    
+    [_vehiclesModel cancel];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    _dataItems=@[NSLocalizedStringFromTable(@"InsurancecompanynameKey",@"MyString", @""),NSLocalizedStringFromTable(@"CustomerservicephoneKey",@"MyString", @""),NSLocalizedStringFromTable(@"policynumberKey",@"MyString", @""),
+                 NSLocalizedStringFromTable(@"altfNumberKey",@"MyString", @""),
+                 NSLocalizedStringFromTable(@"policyeffectivedateKey",@"MyString", @""),
+                 NSLocalizedStringFromTable(@"policyexpirationDateKey",@"MyString", @""),
+                 NSLocalizedStringFromTable(@"ClaimsOfficerKey",@"MyString", @""),NSLocalizedStringFromTable(@"ClaimsOfficerphoneKey",@"MyString", @""),NSLocalizedStringFromTable(@"PolicydetailsKey",@"MyString", @""),
+                 NSLocalizedStringFromTable(@"PolicyMark",@"MyString", @"")];
+    self.title=NSLocalizedStringFromTable(@"InsuranceinformationKey",@"MyString", @"");
+    if (!IOS7_OR_LATER) {
+        _tableView=[[UITableView alloc]initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
+    }
+    if (IOS7_OR_LATER) {
+        _tableView=[[UITableView alloc]initWithFrame:self.view.bounds style:UITableViewStylePlain];
+        CGRect frame=_tableView.frame;
+        frame.origin.y+=64;
+        [_tableView setFrame:frame];
+		[self setExtraCellLineHidden:_tableView];
+    }
+
+    _tableView.backgroundColor = [UIColor clearColor];
+    _tableView.backgroundView=nil;
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:_tableView];
+    
+//    UIBarButtonItem *menuItem = [[UIBarButtonItem alloc] initWithTitle:@"编辑" style:UIBarButtonItemStylePlain target:self action:@selector(editTap:)];
+    
+    UIBarButtonItem *menuItem =[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(editTap1:)];
+    self.navigationItem.rightBarButtonItem = menuItem;
+    
+    if (IOS7_OR_LATER) {
+        menuItem.tintColor=[UIColor lightGrayColor];
+    }
+    ADDeviceBase* device=[ADSingletonUtil sharedInstance].currentDeviceBase;
+    [_vehiclesModel requestVehicleInfoForInsureWithArguments:[NSArray arrayWithObject:device.d_vin]];
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+    // Do any additional setup after loading the view from its nib.
+}
+
+-(void)setExtraCellLineHidden: (UITableView *)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+
+- (IBAction)editTap1:(id)sender{
+    ADInsureInfoEditViewController *editView=[[ADInsureInfoEditViewController alloc]initWithNibName:nil bundle:nil];
+    editView.delegate=self;
+    editView.vehicleInsure=_vehiclesModel.vehicleInsureInfo;
+    [self.navigationController pushViewController:editView animated:YES];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void) viewWillAppear:(BOOL)animated{
+
+}
+
+//- (void)
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == _vehiclesModel) {
+        if ([keyPath isEqualToString:KVO_VEHICLE_INSURE_INFO_PATH_NAME]) {
+//            [ADSingletonUtil sharedInstance].vehicleInfo = _vehiclesModel.vehicleInfo;
+            [_tableView reloadData];
+            return;
+        }
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+#pragma mark - Table view data source
+// 有几个区
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+//每个区里有几行
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return _dataItems.count;
+}
+//某区某行显示什么
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+    }
+    cell.textLabel.text = _dataItems[indexPath.row];
+    if (indexPath.row==0) {
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.insuranceCompany;
+    }else if (indexPath.row==1){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.customerServicePhone;
+    }else if (indexPath.row==2){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.policyNumber;
+    }else if (indexPath.row==3){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.aitfNumber;
+    }else if (indexPath.row==4){
+        cell.detailTextLabel.text=(NSString *)_vehiclesModel.vehicleInsureInfo.effectiveDate;
+    }else if (indexPath.row==5){
+        cell.detailTextLabel.text=(NSString *)_vehiclesModel.vehicleInsureInfo.expirationDate;
+    }else if (indexPath.row==6){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.claimClerk;
+    }else if (indexPath.row==7){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.claimClerkPhone;
+    }else if (indexPath.row==8){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.detailInfo;
+    }else if (indexPath.row==9){
+        cell.detailTextLabel.text=_vehiclesModel.vehicleInsureInfo.mark;
+    }
+    
+    cell.backgroundColor=[UIColor whiteColor];
+    //    cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    
+    // Configure the cell...
+    return cell;
+}
+
+- (void) editContactViewController:(ADInsureInfoEditViewController *) vehicleLicenseEditViewController didEditContact:(NSArray * ) contact{
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+    [_vehiclesModel setVehicleInfoForInsureWithArguments:contact];
+}
+
+- (void)requestVehicleInfoForInsureSuccess:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+}
+
+- (void)requestVehicleInfoForInsureFail:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_FIAL message:@"网络异常"];
+}
+
+- (void)requestVehicleInfoForInsureTimeout:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_TIMEOUT message:@"网络超时"];
+}
+
+- (void)setVehicleInfoForInsureSuccess:(NSNotification *)aNoti
+{
+    [IVToastHUD endRequestWithResultType:IV_TOAST_REQUEST_SUCCESS message:nil];
+    
+    ADDeviceBase* device=[ADSingletonUtil sharedInstance].currentDeviceBase;
+    [_vehiclesModel requestVehicleInfoForInsureWithArguments:[NSArray arrayWithObject:device.d_vin]];
+    [IVToastHUD showAsToastWithStatus:NSLocalizedStringFromTable(@"loadingKey",@"MyString", @"")];
+}
+
+
+@end

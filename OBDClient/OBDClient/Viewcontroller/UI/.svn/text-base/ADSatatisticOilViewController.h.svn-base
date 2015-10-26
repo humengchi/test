@@ -1,0 +1,21 @@
+//
+//  ADSatatisticOilViewController.h
+//  OBDClient
+//
+//  Created by hys on 7/7/14.
+//  Copyright (c) 2014年 AnyData.com. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "CorePlot-CocoaTouch.h"
+#include "ADDefine.h"
+
+@interface ADSatatisticOilViewController : UIViewController<CPTBarPlotDataSource>
+
+@property(strong,nonatomic)CPTXYGraph* barChart;
+
+@property(strong,nonatomic)CPTBarPlot* barPlot;
+
+@property(strong,nonatomic)CPTXYPlotSpace* plotSpace;
+
+@end

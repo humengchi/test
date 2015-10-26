@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global
+END
+ADSingletonUtil.m
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/4859/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global/ADSingletonUtil.m
+END
+ADDefine.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/LBS/!svn/ver/5173/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global/ADDefine.h
+END
+ADUncaughtExceptionHandler.h
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LBS/!svn/ver/5283/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global/ADUncaughtExceptionHandler.h
+END
+ADSingletonUtil.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global/ADSingletonUtil.h
+END
+ADUncaughtExceptionHandler.m
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/LBS/!svn/ver/5283/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/Global/ADUncaughtExceptionHandler.m
+END

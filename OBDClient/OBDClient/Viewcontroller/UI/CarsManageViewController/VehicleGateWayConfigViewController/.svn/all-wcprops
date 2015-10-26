@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController
+END
+ADVehicleGateWayConfigViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 170
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigViewController.h
+END
+ADVehicleGateWayConfigEditViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 176
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigEditViewController.xib
+END
+ADVehicleGateWayConfigViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 170
+/svn/LBS/!svn/ver/5282/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigViewController.m
+END
+ADVehicleGateWayConfigEditViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 174
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigEditViewController.h
+END
+ADVehicleGateWayConfigEditViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 174
+/svn/LBS/!svn/ver/5183/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigEditViewController.m
+END
+ADVehicleGateWayConfigViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 172
+/svn/LBS/!svn/ver/4636/02_OBD/trunk/client/ios/_v3/OBDClient/Classes/UI/CarsManageViewController/VehicleGateWayConfigViewController/ADVehicleGateWayConfigViewController.xib
+END

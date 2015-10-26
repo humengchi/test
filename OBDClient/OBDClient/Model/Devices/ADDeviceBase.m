@@ -1,0 +1,514 @@
+//
+//  ADDeviceBase.m
+//  OBDClient
+//
+//  Created by Holyen Zou on 13-5-3.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADDeviceBase.h"
+
+@interface ADDeviceBase ()
+
+@property (nonatomic, strong) NSString *deviceIndex;
+@property (nonatomic, strong) NSString *deviceID;
+@property (nonatomic, strong) NSString *MDN;
+@property (nonatomic, strong) NSString *acctID;
+@property (nonatomic, strong) NSString *userID;
+@property (nonatomic, strong) NSString *memberNum;
+@property (nonatomic) BOOL enabled;
+@property (nonatomic, strong) NSString *status;
+@property (nonatomic, strong) NSDate *activationDate;
+@property (nonatomic, strong) NSString *ratePlan;
+@property (nonatomic, strong) NSString *emailToSMS;
+@property (nonatomic, strong) NSString *dvcType;
+@property (nonatomic, strong) NSString *carrierID;
+@property (nonatomic, strong) NSString *id_type;
+@property (nonatomic, strong) NSString *imsi;
+@property (nonatomic, strong) NSString *d_esn;
+@property (nonatomic, strong) NSString *d_vin;
+@property (nonatomic, strong) NSString *nickname;
+@property (nonatomic, strong) NSDate *getDTC;
+@property (nonatomic, strong) NSString *obdProtocol;
+@property (nonatomic,strong) NSString *customerServicePhone;
+@property (nonatomic, strong) NSString *vehicleIndex;
+@property (nonatomic, strong) NSString *BrandID;
+@property (nonatomic, strong) NSString *licenseNumber;
+@property (nonatomic, strong) NSString *TotalMilage;
+@property (nonatomic) BOOL bindedFlag;
+@property (nonatomic) BOOL activatedFlag;
+@property (nonatomic,  strong) NSString *registerKey;
+@property (nonatomic) BOOL shareFlag;
+@property (nonatomic) NSString *bind4sDep;
+@property (nonatomic) NSString *bind4sDepID;
+@property (nonatomic) NSString *accountType;
+//@property (nonatomic) BOOL defenceFlag;
+@property (nonatomic) NSString *modelName;
+
+//新增属性
+@property (nonatomic, strong) NSString *location;
+@property (nonatomic, strong) NSDictionary *lastLocation;
+@property (nonatomic, strong) NSString *accel_x;
+@property (nonatomic, strong) NSString *accel_y;
+@property (nonatomic, strong) NSString *accel_z;
+
+@property (nonatomic, strong) NSString *address_city;
+@property (nonatomic, strong) NSString *address_country;
+@property (nonatomic, strong) NSString *address_num;
+@property (nonatomic, strong) NSString *address_state;
+@property (nonatomic, strong) NSString *address_street;
+@property (nonatomic, strong) NSString *address_zip;
+@property (nonatomic, strong) NSString *altitude;
+@property (nonatomic)         float     batt_level;
+@property (nonatomic, strong) NSString *code;
+@property (nonatomic, strong) NSString *driving_dist;
+@property (nonatomic, strong) NSString *engineRPM;
+@property (nonatomic, strong) NSString *fixType;
+@property (nonatomic)         float     fuel_level_bef;
+@property (nonatomic)         float     fuel_level_now;
+@property (nonatomic, strong) NSString *geoID;
+@property (nonatomic, strong) NSString  *gpsDate;
+@property (nonatomic, strong) NSString *gpsTime;
+@property (nonatomic, strong) NSString *high_temp;
+@property (nonatomic, strong) NSString *idle_time;
+@property (nonatomic)         float     latitude;
+@property (nonatomic)         float     longitude;
+@property (nonatomic, strong) NSString *max_rpm;
+@property (nonatomic, strong) NSString *max_speed;
+@property (nonatomic, strong) NSString *num_of_dtc;
+@property (nonatomic, strong) NSString *raw_data_include;
+@property (nonatomic, strong) NSString *raw_x;
+@property (nonatomic, strong) NSString *raw_y;
+@property (nonatomic, strong) NSString *raw_z;
+@property (nonatomic)         float     speed;
+@property (nonatomic, strong) NSString *speed_corner;
+@property (nonatomic, strong) NSString *speed_dir;
+@property (nonatomic, strong) NSDate   *time_remove;
+@property (nonatomic, strong) NSDate   *unauth_time;
+@property (nonatomic, strong) NSString *oilType;
+@end
+
+@implementation ADDeviceBase
+
+- (id)initWithDeviceIndex:(NSString *)aDeviceIndex
+                 deviceID:(NSString *)aDeviceID
+                      mdn:(NSString *)aMDN
+                   acctID:(NSString *)aAcctID
+                   userID:(NSString *)aUserID
+                memberNum:(NSString *)aMemberNum
+                  enabled:(NSString *)aEnabled
+                   status:(NSString *)aStatus
+           activationDate:(NSString *)aActivationDate
+                 ratePlan:(NSString *)aRatePlan
+               emailToSMS:(NSString *)aEmailToSMS
+                  dvcType:(NSString *)aDvcType
+                carrierID:(NSString *)aCarrierID
+                  id_type:(NSString *)aId_type
+                     imsi:(NSString *)aImsi
+                    d_esn:(NSString *)aD_esn
+                    d_vin:(NSString *)aD_vin
+                 nickname:(NSString *)aNickname
+                   getDTC:(NSString *)aGetDTC
+              obdProtocol:(NSString *)aObdProtocol
+     customerServicePhone:(NSString *)aCustomerServicePhone
+             vehicleIndex:(NSString *)aVehicleIndex
+                  BrandID:(NSString *)aBrandID
+                  oilType:(NSString *)aOilType
+            licenseNumber:(NSString *)alicenseNumber
+              totalMilage:(NSString *)aTotalMilage
+               bindedFlag:(NSString *)aBindedFlag
+            activatedFlag:(NSString *)aActivatedFlag
+              registerKey:(NSString *)aRegisterKey
+                shareFlag:(NSString *)aShareFlag
+                bind4sDep:(NSString *)aBind4sDep
+              bind4sDepID:(NSString *)aBind4sDepID
+              accountType:(NSString *)aAccountType
+              defenceFlag:(NSString *)aDefenceFlag
+                modelName:(NSString *)aModelName
+
+//新增属性
+                 location:(NSString *)aLocation
+             lastLocation:(NSDictionary *)aLastLocation
+                  accel_x:(NSString *)aAccel_x
+                  accel_y:(NSString *)aAccel_y
+                  accel_z:(NSString *)aAccel_z
+             address_city:(NSString *)aAddress_city
+          address_country:(NSString *)aAddress_country
+              address_num:(NSString *)aAddress_num
+            address_state:(NSString *)aAddress_state
+           address_street:(NSString *)aAddress_street
+              address_zip:(NSString *)aAddress_zip
+                 altitude:(NSString *)aAltitude
+               batt_level:(NSString *)aBatt_level
+                     code:(NSString *)aCode
+             driving_dist:(NSString *)aDriving_dist
+                engineRPM:(NSString *)aEngineRPM
+                  fixType:(NSString *)aFixType
+           fuel_level_bef:(NSString *)aFuel_level_bef
+           fuel_level_now:(NSString *)aFuel_level_now
+                    geoID:(NSString *)aGeoID
+                  gpsDate:(NSString *)aGpsDate
+                  gpsTime:(NSString *)aGpsTime
+                high_temp:(NSString *)aHigh_temp
+                idle_time:(NSString *)aIdle_time
+                 latitude:(NSString *)aLatitude
+                longitude:(NSString *)aLongitude
+                  max_rpm:(NSString *)aMax_rpm
+                max_speed:(NSString *)aMax_speed
+               num_of_dtc:(NSString *)aNum_of_dtc
+         raw_data_include:(NSString *)aRaw_data_include
+                    raw_x:(NSString *)aRaw_x
+                    raw_y:(NSString *)aRaw_y
+                    raw_z:(NSString *)aRaw_z
+                    speed:(NSString *)aSpeed
+             speed_corner:(NSString *)aSpeed_corner
+                speed_dir:(NSString *)aSpeed_dir
+              time_remove:(NSString *)aTime_remove
+              unauth_time:(NSString *)aUnauth_time
+{
+
+    if (self = [super init]) {
+        /*  for debug **/
+        /*
+        if (!aDeviceIndex           ||
+            !aDeviceID              ||
+            !aMDN                   ||
+            !aAcctID                ||
+            !aUserID                ||
+            !aMemberNum             ||
+            !aEnabled               ||
+            !aStatus                ||
+            !aActivationDate        ||
+            !aRatePlan              ||
+            !aEmailToSMS            ||
+            !aDvcType               ||
+            !aCarrierID             ||
+            !aId_type               ||
+            !aImsi                  ||
+            !aD_esn                 ||
+            !aD_vin                 ||
+            !aNickname              ||
+            !aGetDTC                ||
+            !aObdProtocol
+            ) {
+            self = nil;
+            NSAssert(0, @"one of parameters is nil at least");
+            return nil;
+        }
+        **/
+    
+        self.deviceIndex = aDeviceIndex;
+        self.deviceID = aDeviceID;
+        self.MDN = aMDN;
+        self.acctID = aAcctID;
+        self.userID = aUserID;
+        self.memberNum = aMemberNum;
+        
+//        NSAssert([aEnabled isEqualToString:@"0"] ||
+//                 [aEnabled isEqualToString:@"1"], @"value of enabled is not handle"); // just for later.
+        self.enabled = ([aEnabled isEqualToString:@"0"] ? YES : NO);
+        self.status = aStatus;
+        self.activationDate = [aActivationDate isKindOfClass:[NSNull class]] ? nil :[aActivationDate dateFromStringHasTime:NO];
+        self.ratePlan = aRatePlan;
+        self.emailToSMS = aEmailToSMS;
+        self.dvcType = aDvcType;
+        self.carrierID = aCarrierID;
+        self.id_type = aId_type;
+        self.imsi = aImsi;
+        self.d_esn = aD_esn;
+        self.d_vin = aD_vin;
+        self.nickname = aNickname;
+        self.getDTC = [aGetDTC isKindOfClass:[NSNull class]] ? nil : [aGetDTC dateFromStringHasTime:NO];
+        self.obdProtocol = aObdProtocol;
+        self.customerServicePhone = [aCustomerServicePhone isEqual:[NSNull null]]?@"":aCustomerServicePhone;
+        self.vehicleIndex = aVehicleIndex;
+        self.BrandID = aBrandID;
+        self.oilType = aOilType;
+        self.licenseNumber = alicenseNumber;
+        self.TotalMilage = aTotalMilage;
+        self.bindedFlag = ([aBindedFlag isEqualToString:@"1"] ? YES : NO);
+        self.activatedFlag = ([aActivatedFlag isEqualToString:@"1"] ? YES : NO);
+        self.registerKey = aRegisterKey;
+        self.shareFlag = ([aShareFlag isEqualToString:@"1"] ? YES : NO);
+        self.bind4sDep = aBind4sDep;
+        self.bind4sDepID = aBind4sDepID;
+        self.accountType = aAccountType;
+        self.defenceFlag = ([aDefenceFlag isEqualToString:@"1"] ? YES : NO);
+        self.modelName = aModelName;
+        
+        //新增属性
+        self.location = aLocation;
+        self.lastLocation = aLastLocation;
+        self.accel_x = aAccel_x;
+        self.accel_y = aAccel_y;
+        self.accel_z = aAccel_z;
+        self.address_city = aAddress_city;
+        self.address_country = aAddress_country;
+        self.address_num = ([aLatitude floatValue]==0&&[aLongitude floatValue]==0)? NSLocalizedStringFromTable(@"noposition",@"MyString", @""):aAddress_num;
+        self.address_state = aAddress_state;
+        self.address_street = aAddress_street;
+        self.address_zip = aAddress_zip;
+        self.altitude = aAltitude;
+        self.batt_level = [aBatt_level floatValue];
+        self.code = aCode;
+        self.driving_dist = aDriving_dist;
+        self.engineRPM = aEngineRPM;
+        self.fixType = aFixType;
+        self.fuel_level_bef = [aFuel_level_bef floatValue];
+        self.fuel_level_now = [aFuel_level_now floatValue];
+        self.geoID = aGeoID;
+        self.gpsDate = aGpsDate;
+        self.gpsTime = aGpsTime;
+        self.high_temp = aHigh_temp;
+        self.idle_time = aIdle_time;
+        self.latitude = [aLatitude floatValue];
+        self.longitude = [aLongitude floatValue];
+        self.max_rpm = aMax_rpm;
+        self.max_speed = aMax_speed;
+        self.num_of_dtc = aNum_of_dtc;
+        self.ratePlan = aRatePlan;
+        self.raw_data_include = aRaw_data_include;
+        self.raw_x = aRaw_x;
+        self.raw_y = aRaw_y;
+        self.raw_z = aRaw_z;
+        self.speed = [aSpeed floatValue];
+        self.speed_corner = aSpeed_corner;
+        self.speed_dir = aSpeed_dir;
+        if(aTime_remove != [NSNull null]){
+//            NSLog(@"atime_remove:%d", aTime_remove.length);
+            self.time_remove = [aTime_remove dateFromStringHasTime:YES];
+        }else{
+//            self.time_remove = [NSDate date];
+        }
+        self.unauth_time = [aUnauth_time dateFromStringHasTime:YES];
+
+    }
+    return self;
+}
+
+- (id)initWithDictionary:(NSDictionary *)aDict
+{
+    NSString *deviceID = [aDict objectForKey:@"deviceID"];
+    NSString *deviceIndex = [aDict objectForKey:@"deviceIndex"];
+    NSString *MDN = [aDict objectForKey:@"MDN"];
+    NSString *acctID = [aDict objectForKey:@"acctID"];
+    NSString *userID = [aDict objectForKey:@"userID"];
+    NSString *memberNum = [aDict objectForKey:@"memberNum"];
+    NSString *enabled = [aDict objectForKey:@"enabled"];
+    NSString *status = [aDict objectForKey:@"status"];
+    NSString *activationDate = [aDict objectForKey:@"activationDate"];
+    NSString *ratePlan = [aDict objectForKey:@"ratePlan"];
+    NSString *emailToSMS = [aDict objectForKey:@"emailToSMS"];
+    NSString *dvcType = [aDict objectForKey:@"dvcType"];
+    NSString *carrierID = [aDict objectForKey:@"carrierID"];
+    NSString *id_type = [aDict objectForKey:@"id_type"];
+    NSString *imsi = [aDict objectForKey:@"imsi"];
+    NSString *d_esn = [aDict objectForKey:@"d_esn"];
+    NSString *d_vin = [aDict objectForKey:@"d_vin"];
+    NSString *nickname = [aDict objectForKey:@"nickname"];
+    NSString *getDTC = [aDict objectForKey:@"getDTC"];
+    NSString *obdProtocol = [aDict objectForKey:@"obdProtocol"];
+    NSString *customerServicePhone = [aDict objectForKey:@"customerServicePhone"];
+    NSString *vehicleIndex = [aDict objectForKey:@"vehicleIndex"];
+    NSString *BrandID = [aDict objectForKey:@"BrandID"];
+    NSString *oilType = [aDict objectForKey:@"oilType"];
+    NSString *licenseNumber = [aDict objectForKey:@"licenseNumber"];
+    NSString *totalMilage  = [aDict objectForKey:@"TotalMilage"];
+    NSString *bindedFlag = [aDict objectForKey:@"bindedFlag"];
+    NSString *activatedFlag = [aDict objectForKey: @"activatedFlag"];
+    NSString *registerKey = [aDict objectForKey:@"registerKey"];
+    NSString *shareFlag =@"0";
+    if([aDict objectForKey:@"shareFlag"]!=[NSNull null]){
+        shareFlag = [aDict objectForKey:@"shareFlag"];
+    }
+    NSString *bind4sDep = [aDict objectForKey:@"bind4sDep"];
+    NSString *bind4sDepID = [aDict objectForKey:@"bind4sDepID"];
+    NSString *accountType = [aDict objectForKey:@"accountType"];
+    NSString *defenceFlag =@"0";
+    if([aDict objectForKey:@"defenceFlag"]!=[NSNull null]){
+        defenceFlag = [aDict objectForKey:@"defenceFlag"];
+    }
+    NSString *modelName = [aDict objectForKey:@"ModelName"];
+    
+    NSString *location;
+    NSDictionary *lastLocation;
+    NSString *accel_x;
+    NSString *accel_y;
+    NSString *accel_z;
+    NSString *address_city;
+    NSString *address_country;
+    NSString *address_num;
+    NSString *address_state;
+    NSString *address_street;
+    NSString *address_zip;
+    NSString *altitude;
+    NSString *batt_level;
+    NSString *code;
+    NSString *driving_dist;
+    NSString *engineRPM;
+    NSString *fixType;
+    NSString *fuel_level_bef;
+    NSString *fuel_level_now;
+    NSString *geoID;
+    NSString *gpsDate;
+    NSString *gpsTime;
+    NSString *high_temp;
+    NSString *idle_time;
+    NSString *latitude;
+    NSString *longitude;
+    NSString *max_rpm;
+    NSString *max_speed;
+    NSString *num_of_dtc;
+    NSString *raw_data_include;
+    NSString *raw_x;
+    NSString *raw_y;
+    NSString *raw_z;
+    NSString *speed;
+    NSString *speed_corner;
+    NSString *speed_dir;
+    NSString *time_remove;
+    NSString *unauth_time;
+    
+    if([self isNull:[aDict objectForKey:@"lastlocation"]]){
+        lastLocation=[[aDict objectForKey:@"lastlocation"] properties];
+    }
+    
+    if([self isNull:[aDict objectForKey:@"location"]]){
+        location = @"exist";
+        NSDictionary *locationDictionary=[[aDict objectForKey:@"location"] properties];
+        accel_x = [locationDictionary objectForKey:@"accel_x"];
+        accel_y = [locationDictionary objectForKey:@"accel_y"];
+        accel_z = [locationDictionary objectForKey:@"accel_z"];
+        address_city = [locationDictionary objectForKey:@"address_city"];
+        address_country = [locationDictionary objectForKey:@"address_country"];
+        address_num = [locationDictionary objectForKey:@"address_num"];
+        address_state = [locationDictionary objectForKey:@"address_state"];
+        address_street = [locationDictionary objectForKey:@"address_street"];
+        address_zip = [locationDictionary objectForKey:@"address_zip"];
+        altitude = [locationDictionary objectForKey:@"altitude"];
+        batt_level = [locationDictionary objectForKey:@"batt_level"];
+        code = [locationDictionary objectForKey:@"code"];
+        driving_dist = [locationDictionary objectForKey:@"driving_dist"];
+        engineRPM = [locationDictionary objectForKey:@"engineRPM"];
+        fixType = [locationDictionary objectForKey:@"fixType"];
+        fuel_level_bef = [locationDictionary objectForKey:@"fuel_level_bef"];
+        fuel_level_now = [locationDictionary objectForKey:@"fuel_level_now"];
+        geoID = [locationDictionary objectForKey:@"geoID"];
+        gpsDate = [locationDictionary objectForKey:@"gpsDate"];
+        gpsTime = [locationDictionary objectForKey:@"gpsTime"];
+        high_temp = [locationDictionary objectForKey:@"high_temp"];
+        idle_time = [locationDictionary objectForKey:@"idle_time"];
+        latitude = [locationDictionary objectForKey:@"latitude"];
+        longitude = [locationDictionary objectForKey:@"longitude"];
+        max_rpm = [locationDictionary objectForKey:@"max_rpm"];
+        max_speed = [locationDictionary objectForKey:@"max_speed"];
+        num_of_dtc = [locationDictionary objectForKey:@"num_of_dtc"];
+        raw_data_include = [locationDictionary objectForKey:@"raw_data_include"];
+        raw_x = [locationDictionary objectForKey:@"raw_x"];
+        raw_y = [locationDictionary objectForKey:@"raw_y"];
+        raw_z = [locationDictionary objectForKey:@"raw_z"];
+        speed = [locationDictionary objectForKey:@"speed"];
+        speed_corner = [locationDictionary objectForKey:@"speed_corner"];
+        speed_dir = [locationDictionary objectForKey:@"speed_dir"];
+        time_remove = [locationDictionary objectForKey:@"time_remove"];
+        unauth_time = [locationDictionary objectForKey:@"unauth_time"];
+    }
+        
+    return [self initWithDeviceIndex:deviceIndex
+                            deviceID:deviceID
+                                 mdn:MDN
+                              acctID:acctID
+                              userID:userID
+                           memberNum:memberNum
+                             enabled:enabled
+                              status:status
+                      activationDate:activationDate
+                            ratePlan:ratePlan
+                          emailToSMS:emailToSMS
+                             dvcType:dvcType
+                           carrierID:carrierID
+                             id_type:id_type
+                                imsi:imsi
+                               d_esn:d_esn
+                               d_vin:d_vin
+                            nickname:nickname
+                              getDTC:getDTC
+                         obdProtocol:obdProtocol
+                customerServicePhone:customerServicePhone
+                        vehicleIndex:vehicleIndex
+                             BrandID:BrandID
+                             oilType:oilType
+                       licenseNumber:licenseNumber
+                         totalMilage:totalMilage
+                          bindedFlag:bindedFlag
+                       activatedFlag:activatedFlag
+                         registerKey:registerKey
+                           shareFlag:shareFlag
+                           bind4sDep:bind4sDep
+                         bind4sDepID:bind4sDepID
+                         accountType:accountType
+                         defenceFlag:defenceFlag
+                           modelName:modelName
+            //新增属性
+                            location:location
+                        lastLocation:lastLocation
+                             accel_x:accel_x
+                             accel_y:accel_y
+                             accel_z:accel_z
+                        address_city:address_city
+                     address_country:address_country
+                         address_num:address_num
+                       address_state:address_state
+                      address_street:address_street
+                         address_zip:address_zip
+                            altitude:altitude
+                          batt_level:batt_level
+                                code:code
+                        driving_dist:driving_dist
+                           engineRPM:engineRPM
+                             fixType:fixType
+                      fuel_level_bef:fuel_level_bef
+                      fuel_level_now:fuel_level_now
+                               geoID:geoID
+                             gpsDate:gpsDate
+                             gpsTime:gpsTime
+                           high_temp:high_temp
+                           idle_time:idle_time
+                            latitude:latitude
+                           longitude:longitude
+                             max_rpm:max_rpm
+                           max_speed:max_speed
+                          num_of_dtc:num_of_dtc
+                    raw_data_include:raw_data_include
+                               raw_x:raw_x
+                               raw_y:raw_y
+                               raw_z:raw_z
+                               speed:speed
+                        speed_corner:speed_corner
+                           speed_dir:speed_dir
+                         time_remove:time_remove
+                         unauth_time:unauth_time];
+}
+
+-(BOOL)isNull:(id)object
+{
+    // 判断是否为空
+    if ([object isEqual:[NSNull null]] || object==[NSNull null]) {
+        return NO;
+    }
+    else if ([object isKindOfClass:[NSNull class]])
+    {
+        return NO;
+    }
+    else if ([object isKindOfClass:[NSString class]])
+    {
+        return NO;
+    }
+    else if (object==nil || object == NULL){
+        return NO;
+    }
+    
+    return YES;
+}
+
+@end

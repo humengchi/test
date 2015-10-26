@@ -1,0 +1,188 @@
+//
+//  ADReset4SStoreViewController.m
+//  OBDClient
+//
+//  Created by lbs anydata on 13-11-15.
+//  Copyright (c) 2013年 AnyData.com. All rights reserved.
+//
+
+#import "ADReset4SStoreViewController.h"
+
+@interface ADReset4SStoreViewController ()
+
+@end
+
+@implementation ADReset4SStoreViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _vehiclesModel=[[ADVehiclesModel alloc]init];
+        [_vehiclesModel addObserver:self
+                         forKeyPath:KVO_VEHICLE_CURRENT_4SSTORES_LIST_PATH_NAME
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+        
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_vehiclesModel removeObserver:self forKeyPath:KVO_VEHICLE_CURRENT_4SSTORES_LIST_PATH_NAME];
+    [_vehiclesModel cancel];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    self.title = NSLocalizedStringFromTable(@"ReBind",@"MyString", @"");
+    
+    _searchBar = [[UISearchBar alloc]initWithFrame:CGRectMake(40, 0, WIDTH, 44)];
+    _searchBar.barStyle=UIBarStyleBlackOpaque;
+    _searchBar.showsCancelButton = YES;
+//    _searchBar.autocorrectionType = UITextAutocorrectionTypeNo;
+//    _searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
+//    _searchBar.keyboardType = UIKeyboardTypeAlphabet;
+    _searchBar.placeholder= NSLocalizedStringFromTable(@"Input4sStoreName",@"MyString", @"");
+    _searchBar.delegate=self;
+//    _searchBar.backgroundColor = [UIColor whiteColor];
+//    [[_searchBar.subviews objectAtIndex:0]removeFromSuperview];
+    [self.view addSubview:_searchBar];
+    
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,44, WIDTH, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [self.view addSubview:lineView];
+//    _displayController = [[UISearchDisplayController alloc]initWithSearchBar:_searchBar contentsController:self];
+//    _displayController.searchResultsDelegate=self;
+//    _displayController.searchResultsDataSource=self;
+    
+    CGRect frame=self.view.bounds;
+    frame.origin.y+=0;
+    
+    _tableView = [[UITableView alloc]initWithFrame:frame style:UITableViewStylePlain];
+    _tableView.backgroundView=nil;
+    _tableView.backgroundColor=[UIColor clearColor];
+    _tableView.delegate=self;
+    _tableView.dataSource=self;
+    _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    _tableView.tableHeaderView = _searchBar;
+    [self.view addSubview:_tableView];
+    
+    if (IOS7_OR_LATER) {
+//        [_searchBar setFrame:CGRectMake(0, 64, WIDTH, 44)];
+        [lineView setFrame:CGRectMake(0, 108, WIDTH, 1)];
+        CGRect frame=_tableView.frame;
+        frame.origin.y+=64;
+        frame.size.height-=41;
+        [_tableView setFrame:frame];
+        [self setExtraCellLineHidden:_tableView];
+    }
+    
+    [_vehiclesModel requestCurrent4SStoresListWithArguments:[NSArray arrayWithObject:@""]];
+    
+    // Do any additional setup after loading the view from its nib.
+}
+
+-(void)setExtraCellLineHidden: (UITableView *)tableView
+{
+    UIView *view = [UIView new];
+    view.backgroundColor = [UIColor clearColor];
+    [tableView setTableFooterView:view];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar{
+    [_searchBar resignFirstResponder];
+    if([searchBar.text isEqualToString:@" "]){
+        [_vehiclesModel requestCurrent4SStoresListWithArguments:[NSArray arrayWithObject:@""]];
+    }else{
+        [_vehiclesModel requestCurrent4SStoresListWithArguments:[NSArray arrayWithObject:searchBar.text]];
+    }
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *) searchBar{
+     [_searchBar resignFirstResponder];
+}
+
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar {
+    _searchBar.showsScopeBar = YES;
+    [_searchBar sizeToFit];
+    [_searchBar setShowsCancelButton:YES animated:YES];
+    return YES;
+}
+- (BOOL)searchBarShouldEndEditing:(UISearchBar *)searchBar {
+    _searchBar.showsScopeBar = NO;
+    [_searchBar sizeToFit];
+    [_searchBar setShowsCancelButton:NO animated:YES];
+    return YES;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+    if (object == _vehiclesModel) {
+        if ([keyPath isEqualToString:KVO_VEHICLE_CURRENT_4SSTORES_LIST_PATH_NAME]) {
+            [_tableView reloadData];
+            return;
+        }
+    }
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+}
+
+#pragma mark - Table view data source
+
+// 有几个区
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+//每个区里有几行
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return _vehiclesModel.current4sStoresList.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 41;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    NSDictionary * storeInfo = _vehiclesModel.current4sStoresList[indexPath.row];
+    [self.delegate editContactViewController:self didEditContact:[NSArray arrayWithObjects:[ADSingletonUtil sharedInstance].currentDeviceBase.deviceID,[storeInfo objectForKey:@"id"], nil]];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+//某区某行显示什么
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"Cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+//    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:CellIdentifier];
+//    }
+    NSDictionary * storeInfo = _vehiclesModel.current4sStoresList[indexPath.row];
+    cell.textLabel.text=(NSString *)[storeInfo objectForKey:@"name"];    
+    cell.textLabel.textColor=[UIColor grayColor];
+    
+    if([storeInfo objectForKey:@"tel"] != [NSNull null])
+    cell.detailTextLabel.text = (NSString *)[storeInfo objectForKey:@"tel"];
+    cell.detailTextLabel.textColor = [UIColor grayColor];
+    
+    UIView *lineView=[[UIView alloc]initWithFrame:CGRectMake(0,40, cell.bounds.size.width, 1)];
+    lineView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"vehicle_list_line.png"]];
+    [cell addSubview:lineView];
+    
+    
+    cell.accessoryType=UITableViewCellAccessoryNone;
+    return cell;
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
